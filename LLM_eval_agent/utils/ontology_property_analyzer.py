@@ -5,9 +5,9 @@ from rdflib.namespace import RDF, RDFS, OWL
 
 import json
 
-from semantic_iot.utils import LLMAgent
-from semantic_iot.utils.reasoning import inference_owlrl
-from semantic_iot.utils.prompts import prompts
+from LLM_eval_agent.utils import LLMAgent
+from LLM_eval_agent.utils.reasoning import inference_owlrl
+from LLM_eval_agent.utils.prompts import prompts
 
 project_root_path = Path(__file__).parent.parent.parent
 
@@ -344,7 +344,7 @@ class OntologyPropertyAnalyzer:
         return extra_nodes
     
 if prompts.ontology_path is None:
-    ontology_processor = OntologyPropertyAnalyzer(str(Path(project_root_path, "LLM_eval/ontologies/Brick.ttl")))  # Default ontology path if not set
+    ontology_processor = OntologyPropertyAnalyzer(str(Path(project_root_path, "LLM_eval_agent/ontologies/Brick.ttl")))  # Default ontology path if not set
 else:
     ontology_processor = OntologyPropertyAnalyzer(prompts.ontology_path)
 

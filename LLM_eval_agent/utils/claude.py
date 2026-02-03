@@ -9,7 +9,7 @@ from mermaid import Mermaid
 import matplotlib.pyplot as plt
 import numpy as np
 import pyperclip
-from semantic_iot.utils.prompts import prompts
+from LLM_eval_agent.utils.prompts import prompts
 from pathlib import Path
 utils_path = Path(__file__).parent
 
@@ -194,7 +194,7 @@ class LLMAgent:
             }
         
         if tools:
-            from semantic_iot.utils.tools import execute_tool, FILE_ACCESS, CONTEXT, VALIDATION, RML_ENGINE, SIOT_TOOLS
+            from LLM_eval_agent.utils.tools import execute_tool, FILE_ACCESS, CONTEXT, VALIDATION, RML_ENGINE, SIOT_TOOLS
             selected_tools = []
             if "context"     in tools: selected_tools.extend(CONTEXT)
             if "file_access" in tools: selected_tools.extend(FILE_ACCESS)

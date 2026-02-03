@@ -9,14 +9,13 @@ import sys
 from semantic_iot import MappingPreprocess
 from semantic_iot import RMLMappingGenerator
 from semantic_iot import RDFGenerator
-from semantic_iot.controller_configuration import ControllerConfiguration
+from .controller_config import ControllerConfiguration
 
-from semantic_iot.utils.reasoning import inference_owlrl
-from semantic_iot.utils.API_spec_processor import APISpecProcessor
-from semantic_iot.utils.ontology_property_analyzer import ontology_processor
-from semantic_iot.utils.ontology_processor import OntologyProcessor
-from semantic_iot.utils.prompts import prompts
-
+from .reasoning import inference_owlrl
+from .API_spec_processor import APISpecProcessor
+from .ontology_property_analyzer import ontology_processor
+from .ontology_processor import OntologyProcessor
+from .prompts import prompts
 
 ###################################################################################
 # Tool definitions

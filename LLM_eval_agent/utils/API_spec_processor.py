@@ -3,7 +3,7 @@ import re
 from typing import List, Dict, Any, Optional
 from sentence_transformers import SentenceTransformer
 
-from semantic_iot.utils import LLMAgent
+from LLM_eval_agent.utils import LLMAgent
 
 
 class APISpecProcessor:
