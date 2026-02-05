@@ -3,13 +3,14 @@ import os
 import datetime
 import json
 import time
-
+import pyperclip
+import sys
 # from mermaid import
 
-from semantic_iot.utils import LLMAgent
-from semantic_iot.utils import prompts
+from LLM_eval_agent.utils import LLMAgent
+from LLM_eval_agent.utils import prompts
 
-from semantic_iot.utils.tools import generate_rdf_from_rml, reasoning, generate_controller_configuration, term_mapper, get_endpoint_from_api_spec, generate_rml_from_rnr, generate_rdf_from_rml, preprocess_json
+from LLM_eval_agent.utils.tools import generate_rdf_from_rml, reasoning, generate_controller_configuration, term_mapper, get_endpoint_from_api_spec, generate_rml_from_rnr, generate_rdf_from_rml, preprocess_json
 
 timestamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
 datasets_path = Path(__file__).parent
@@ -85,10 +86,12 @@ class ScenarioExecutor:
     def __init__(self,
                  rep: int = 1,
                  test = False,
+                 offline_mode: bool = True,
                  dataset_folder: str = None,
                  ontology_folder: str = None,
                  api_spec_folder: str = None):
         self.rep = rep
+        self.offline_mode = offline_mode
         self.dataset_folder = dataset_folder if dataset_folder else datasets_path
         self.ontology_folder = ontology_folder if ontology_folder else Path(datasets_path.parent, "ontologies")
         self.api_spec_folder = api_spec_folder if api_spec_folder else Path(datasets_path.parent, "API_specs")
@@ -230,30 +233,60 @@ class ScenarioExecutor:
             system_prompt=prompts.system_default,
             result_folder=context_folder
         )
-        try:
-            self.context = client_context.extract_code(
-                client_context.query(
+        raw_response = ""
+
+        if getattr(self, 'offline_mode', True):
+            # --- OFFLINE MODE ---
+            pyperclip.copy(prompts.context)
+
+            print("👉 Paste the prompt above into Gemini.")
+            print("👉 Then copy Gemini's JSON response and paste it below.")
+            print("👉 Type 'EOF' on a new line when you are done pasting.")
+            print("\n--- PASTE GEMINI RESPONSE BELOW ---")
+
+            lines = []
+            while True:
+                try:
+                    line = input()
+                    if line.strip() == "EOF":
+                        break
+                    lines.append(line)
+                except EOFError:
+                    break
+            raw_response = "\n".join(lines)
+            print("--- END OF INPUT ---\n")
+
+        else:
+            # --- ONLINE MODE ---
+            try:
+                raw_response = client_context.query(
                     prompt=prompts.context,
                     step_name="get_context",
                     follow_up=True,
                     tools="context",
                     thinking=True,
-                    offline=True,
+                    # offline=True,
                 )
-            )
+            except Exception as e:
+                print(f"Error in API call: {e}")
+                return None
+
+        try:
+            self.context = client_context.extract_code(raw_response)
+
+            print("Context prepared successfully.")
+            print("Context:", json.dumps(self.context, indent=2))
+
+            prompts.load_context(self.context)
+
+            context_file = os.path.join(context_folder, "context.json")
+            with open(context_file, 'w', encoding='utf-8') as f:
+                json.dump(self.context, f, indent=2)
+            print(f"Context saved to: {context_file}")
+
         except Exception as e:
-            print(f"Error in Claude API call: {e}")
-
-
-        print("Context prepared successfully.")
-        print("Context:", json.dumps(self.context, indent=2))
-
-        # Save context to file
-        prompts.load_context(self.context)
-        context_file = os.path.join(context_folder, "context.json")
-        with open(context_file, 'w', encoding='utf-8') as f:
-            json.dump(self.context, f, indent=2)
-        print(f"Context saved to: {context_file}")
+            print(f"Error parsing context data: {e}")
+            print(raw_response)
 
         return self.context
 
@@ -261,8 +294,8 @@ class ScenarioExecutor:
     def run_scenarios(self, test=False):
 
         if "C" in self.selected_scenarios:
-            print("Get context from Claude...")
-            self.get_context()
+            print("Get context...")
+            self.get_context()  # This now handles online/offline internally
 
         if not hasattr(self, 'context') or not self.context:
             print("\nLoad context from file...")
@@ -324,58 +357,81 @@ class ScenarioExecutor:
 
                     prompts.result_folder = scenario_folder[sc]
 
+                    print(f"\n--- Running scenario {sc} ---")
 
-                    print(f"\nRunning scenario {sc}...")
+                    current_prompt = prompt[sc]
+                    # Initialize Agent
+                    client_scenario = LLMAgent(
+                        # system_prompt=prompts.cot_extraction,
+                        system_prompt=prompts.system_default,
+                        result_folder=scenario_folder[sc]
+                    )
+
+                    raw_response = ""
+
+                    # ==========================================
+                    # MODE SELECTION (Online vs Offline)
+                    # ==========================================
+                    if getattr(self, 'offline_mode', True):
+                        # --- OFFLINE MODE ---
+                        if pyperclip:
+                            pyperclip.copy(current_prompt)
+                            print(
+                                f"Prompt for Scenario {sc} has been copied to your clipboard!")
+
+                        print("Paste it into Gemini, then copy Gemini's response.")
+                        print("Come back here and paste the response below.")
+                        print("Type 'EOF' on a new line when you are done pasting.")
+                        print(f"\n--- PASTE GEMINI RESPONSE BELOW ---")
+
+                        lines = []
+                        while True:
+                            try:
+                                line = input()
+                                if line.strip() == "EOF":
+                                    break
+                                lines.append(line)
+                            except EOFError:
+                                break
+                        raw_response = "\n".join(lines)
+                        print("--- END OF INPUT ---\n")
+
+                    else:
+                        # --- ONLINE MODE ---
+                        print(f"Querying API for Scenario {sc}...")
+                        try:
+                            # Note: You might need to adjust arguments based on your LLMAgent.query definition
+                            raw_response = client_scenario.query(
+                                prompt=current_prompt,
+                                step_name=f"scenario_{sc}",
+                                follow_up=False,
+                                tools="",
+                            )
+                        except Exception as e:
+                            print(f"Error in API call: {e}")
+                            continue
 
                     try:
-                        client_scenario = LLMAgent(
-                            # system_prompt=prompts.cot_extraction,  # TODO needed when evaluating the scenario generation
-                            system_prompt=prompts.system_default,
-                            result_folder=scenario_folder[sc]
-                        )
+                        # Extract clean code/JSON from response
+                        response_data = client_scenario.extract_code(raw_response)
 
-                        response = client_scenario.query(
-                            prompt=prompt[sc],
-                            step_name=f"scenario_{sc}",
-                            tools="",
-                            follow_up=False,
-                            offline=True
-                        )
+                        # Save to file
+                        response_file = os.path.join(scenario_folder[sc], file_name[sc])
+                        with open(response_file, 'w', encoding='utf-8') as f:
+                            if isinstance(response_data, dict) or isinstance(
+                                    response_data, list):
+                                f.write(json.dumps(response_data, indent=2))
+                            else:
+                                f.write(str(response_data))
 
-                        try:
-                            response = client_scenario.extract_code(response)
-                        except Exception as extract_error:
-                            print(f"❌ Error extracting code from Claude response: {extract_error}")
-                            print(f"Raw response type: {type(response)}")
-                            if isinstance(response, str):
-                                print(f"Raw response preview: {response[:300]}...")
-                            # Try to continue with raw response
-                            print("Continuing with raw response...")
+                        print(f"Response saved to: {response_file}")
 
-                        try:
-                            # Save the response to the results folder
-                            response_file = os.path.join(scenario_folder[sc], file_name[sc])
-                            with open(response_file, 'w', encoding='utf-8') as f:
-                                if isinstance(response, dict):
-                                    f.write(json.dumps(response, indent=2))
-                                else:
-                                    f.write(response)
-                            print(f"Response saved to: {response_file}")
-                            # input("Press Enter to continue...")
-                        except Exception as save_error:
-                            print(response)
-                            print(f"❌ Error saving response to file: {save_error}")
-                            print("Continuing with raw response...")
-
-                    except Exception as e:
-                        print(f"❌ Error in generating Claude Response: {e}")
-                        print("Continuing...")
-
-
-
-
-
-                    # FINISH =======================================================
+                    except Exception as save_error:
+                        print(f"Error processing/saving response: {save_error}")
+                        with open(os.path.join(scenario_folder[sc], "raw_response.txt"),
+                                  'w', encoding='utf-8') as f:
+                            f.write(raw_response)
+                        print("Saved raw response instead.")
 
                     if sc == 'III':
                         # Generate RNR from PC
@@ -432,7 +488,7 @@ class ScenarioExecutor:
                     # print("Cooldown for 100 seconds ...")
                     # time.sleep(100)
                 except Exception as e:
-                    error_message = f"🛑 Error in scenario {sc}: {e}"
+                    error_message = f"Error in scenario {sc}: {e}"
                     print(error_message)
                     error_file = os.path.join(scenario_folder[sc], "error.txt")
                     with open(error_file, 'w', encoding='utf-8') as f:
@@ -440,8 +496,8 @@ class ScenarioExecutor:
                     print("Continuing next scenario...")
                     continue
             print("\nCooldown for 100 seconds ...")
-            time.sleep(100)
-        print(f"\n\n✅  All selected scenarios completed. Results saved in {self.result_folder}")
+            time.sleep(5)
+        print(f"\n\nAll selected scenarios completed. Results saved in {self.result_folder}")
 
     def load_context(self, result_folder):
         context_file = get_file(result_folder, "CTX")
@@ -543,6 +599,9 @@ class ScenarioExecutor:
         metrics = add_aggregated_substeps(metrics)
 
         output_file = os.path.join(self.result_folder, "metrics.json")
+
+        os.makedirs(self.result_folder, exist_ok=True)
+
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(metrics, f, indent=4)
 
@@ -681,7 +740,7 @@ if __name__ == "__main__":
 
     clear_metrics()
 
-    executor = ScenarioExecutor()
+    executor = ScenarioExecutor(offline_mode=True)
     executor.choose_dataset()
 
     try:

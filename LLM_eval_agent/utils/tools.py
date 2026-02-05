@@ -9,14 +9,13 @@ import sys
 from semantic_iot import MappingPreprocess
 from semantic_iot import RMLMappingGenerator
 from semantic_iot import RDFGenerator
-from semantic_iot.controller_configuration import ControllerConfiguration
+from .controller_config import ControllerConfiguration
 
-from semantic_iot.utils.reasoning import inference_owlrl
-from semantic_iot.utils.API_spec_processor import APISpecProcessor
-from semantic_iot.utils.ontology_property_analyzer import ontology_processor
-from semantic_iot.utils.ontology_processor import OntologyProcessor
-from semantic_iot.utils.prompts import prompts
-
+from .reasoning import inference_owlrl
+from .API_spec_processor import APISpecProcessor
+from .ontology_property_analyzer import ontology_processor
+from .ontology_processor import OntologyProcessor
+from .prompts import prompts
 
 ###################################################################################
 # Tool definitions
@@ -324,15 +323,20 @@ def wait_for_sec(seconds: int = 60):
 def exit():
     print("🛑 Assistant exits...")
     sys.exit()
+from typing import List
 
-def preprocess_json(json_file_path: str, rdf_node_relationship_file_path: str, ontology_file_paths: str, config_path: str):
+def preprocess_json(json_file_path: str, rdf_node_relationship_file_path: str, ontology_file_paths: List[str], config_path: str):
     """
     Preprocesses the JSON file and saves the result to the output file.
     """
+    # Safety check: if a single string is passed by mistake, wrap it in a list
+    if isinstance(ontology_file_paths, str):
+        ontology_file_paths = [ontology_file_paths]
+
     # config_path = None
     json_processor = MappingPreprocess(
             json_file_path=json_file_path,
-            rdf_node_relationship_file_path=rdf_node_relationship_file_path,
+            intermediate_report_file_path=rdf_node_relationship_file_path,
             ontology_file_paths=ontology_file_paths,
             platform_config=config_path,
             )
@@ -346,7 +350,7 @@ def generate_rml_from_rnr(INPUT_RNR_FILE_PATH: str, OUTPUT_RML_FILE_PATH: str):
         rdf_relationship_file=INPUT_RNR_FILE_PATH,
         output_file=OUTPUT_RML_FILE_PATH
     )
-    rml_generator.load_rdf_node_relationships()
+    rml_generator.load_intermediate_reports()
     rml_generator.create_mapping_file()
 
 def generate_rdf_from_rml(json_file_path: str, rml_file_path: str, output_rdf_file_path: str, platform_config: str = None):

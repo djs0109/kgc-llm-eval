@@ -1,2 +1,5 @@
-anthropic>=0.51.0
-git+https://github.com/N5GEH/semantic-iot.git@v0.3.0
+git+https://github.com/N5GEH/semantic-iot.git#egg=semantic_iot
+pyperclip
+owlrl
+mermaid-py==0.8.0
+matplotlib==3.5.3

@@ -12,10 +12,10 @@ class PromptsLoader:
 
         root_path = Path(__file__).parent.parent.parent
         self.template_paths = {
-            "rdf": str(Path(root_path, "LLM_eval/templates/rdf_template.ttl")),
-            "RML": str(Path(root_path, "LLM_eval/templates/rml_template.ttl")),
-            "config": str(Path(root_path, "LLM_eval/templates/platform_config_template.json")),
-            "context": str(Path(root_path, "LLM_eval/templates/context_template.json")),
+            "rdf": str(Path(root_path, "LLM_eval_agent/templates/rdf_template.ttl")),
+            "RML": str(Path(root_path, "LLM_eval_agent/templates/rml_template.ttl")),
+            "config": str(Path(root_path, "LLM_eval_agent/templates/platform_config_template.json")),
+            "context": str(Path(root_path, "LLM_eval_agent/templates/context_template.json")),
         }
         self.templates = {}
         for key, path in self.template_paths.items():
