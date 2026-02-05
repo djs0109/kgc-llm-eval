@@ -13,7 +13,7 @@ from LLM_eval_agent.utils import prompts
 from LLM_eval_agent.utils.tools import generate_rdf_from_rml, reasoning, generate_controller_configuration, term_mapper, get_endpoint_from_api_spec, generate_rml_from_rnr, generate_rdf_from_rml, preprocess_json
 
 timestamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
-datasets_path = Path(__file__).parent
+datasets_path = Path(__file__).parent / "datasets"
 
 
 def get_file(folder, file_type, keyword=None):
