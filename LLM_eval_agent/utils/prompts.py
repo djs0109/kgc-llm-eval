@@ -1,5 +1,8 @@
 from pathlib import Path
 import textwrap
+from rdflib import Graph, RDF, RDFS, OWL
+
+from sympy.logic.boolalg import Boolean
 
 
 class PromptsLoader:
@@ -22,6 +25,7 @@ class PromptsLoader:
             with open(path, "r") as f: 
                 self.templates[key] = f.read()
 
+        self.offline_mode = False
         # IN-BETWEEN VARIABLES ================================================================
 
         self.ontology_path = None
@@ -40,6 +44,67 @@ class PromptsLoader:
         self.PC_content = None
 
         self.update_variables()
+
+    def set_mode(self, offline: bool):
+        """
+        Sets the execution mode.
+        True = Offline (Inject ontology summary into prompt).
+        False = Online (Instruct LLM to use tools).
+        """
+        self.offline_mode = offline
+        print(f"Mode switched to: {'OFFLINE (List Injection)' if offline else 'ONLINE (Tool Use)'}")
+        self.update_variables()
+
+    def get_ontology_summary(self):
+        """
+        Parse the ontology and return a formatted string of
+        available Classes and Properties with their prefixes (e.g., brick:Sensor).
+        """
+        if not self.ontology_path:
+            return "Ontology not loaded."
+
+        try:
+            g = Graph()
+            g.parse(self.ontology_path, format='turtle')
+
+            classes = set()
+            properties = set()
+
+            # 1. Extract Classes (OWL and RDFS)
+            for s in g.subjects(RDF.type, OWL.Class):
+                try:
+                    classes.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, RDFS.Class):
+                try:
+                    classes.add(g.qname(s))
+                except:
+                    pass
+
+            # 2. Extract Properties (Object and Datatype)
+            for s in g.subjects(RDF.type, OWL.ObjectProperty):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, OWL.DatatypeProperty):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, RDF.Property):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+
+            summary = f"### AVAILABLE ONTOLOGY CLASSES ###\n{', '.join(sorted(list(classes)))}\n\n"
+            summary += f"### AVAILABLE ONTOLOGY PROPERTIES ###\n{', '.join(sorted(list(properties)))}"
+            return summary
+
+        except Exception as e:
+            return f"Error parsing ontology with rdflib: {str(e)}"
 
     def update_variables(self):
 
@@ -343,33 +408,53 @@ class PromptsLoader:
         </input>""")
 
         # CONTEXT PROMPTS ================================================================
+        if self.offline_mode:
+            # --- OFFLINE MODE: INJECT LIST ---
+            ontology_summary = self.get_ontology_summary()
 
-        term_mapping_instructions = textwrap.dedent(f"""
-        # TERM MAPPING INSTRUCTIONS: 
-        <instructions>
-        Based on the extraction of available Ontology Classes and Properties and the list of terms that need to be mapped to the ontology,
-        for each term, you need to select the most appropriate ontology class or property for the domain entity or relation.
-        Do not choose a class or property that is not in the list of available ontology classes or properties.
-        The goal is to inherit the attributes and relations from the selected Ontology Class or Property.
+            term_mapping_instructions = textwrap.dedent(f"""
+            # TERM MAPPING INSTRUCTIONS: 
+            <instructions>
+            You are currently operating in OFFLINE mode. You DO NOT have access to external tools.
 
-        MAPPING CRITERIA: (in order of priority)
-        1. Exact semantic match
-        2. Hierarchical relationship (parent/child concepts)
-        3. Functional equivalence (same purpose/behavior)
-        4. Attribute similarity (same properties/characteristics)
+            Instead, use the list below to find the correct Ontology Classes and Properties.
 
-        SPECIAL CONSIDERATIONS:
-        - Distinguish locations, systems, devices, actuation points, sensors
-        - Avoid category errors: don't confuse the thing itself with top-level infrastructure that supports the thing
+            {ontology_summary}
 
-        JUST FOR CLASSES:
-        - Respect system hierarchies (building → floor → room → equipment)
-        - If the term seems to be a relation, select a class that would have this relation as a property.
-
-        JUST FOR PROPERTIES:
-        - Maintain the original direction of the relationship (subject → predicate → object), e. g.: is_instance_of NOT EQUAL TO is_instanciated_by
-        </instructions>
-        """)
+            MAPPING CRITERIA:
+            1. Look for an Exact semantic match in the list above.
+            2. If no exact match, look for a parent concept (e.g., use 'brick:Sensor' if 'brick:CO2Sensor' is missing).
+            3. Do NOT invent classes that are not in the list.
+            </instructions>
+            """)
+        else:
+            # --- ONLINE MODE: TOOL USE ---
+            term_mapping_instructions = textwrap.dedent(f"""
+            # TERM MAPPING INSTRUCTIONS: 
+            <instructions>
+            Based on the extraction of available Ontology Classes and Properties and the list of terms that need to be mapped to the ontology,
+            for each term, you need to select the most appropriate ontology class or property for the domain entity or relation.
+            Do not choose a class or property that is not in the list of available ontology classes or properties.
+            The goal is to inherit the attributes and relations from the selected Ontology Class or Property.
+    
+            MAPPING CRITERIA: (in order of priority)
+            1. Exact semantic match
+            2. Hierarchical relationship (parent/child concepts)
+            3. Functional equivalence (same purpose/behavior)
+            4. Attribute similarity (same properties/characteristics)
+    
+            SPECIAL CONSIDERATIONS:
+            - Distinguish locations, systems, devices, actuation points, sensors
+            - Avoid category errors: don't confuse the thing itself with top-level infrastructure that supports the thing
+    
+            JUST FOR CLASSES:
+            - Respect system hierarchies (building → floor → room → equipment)
+            - If the term seems to be a relation, select a class that would have this relation as a property.
+    
+            JUST FOR PROPERTIES:
+            - Maintain the original direction of the relationship (subject → predicate → object), e. g.: is_instance_of NOT EQUAL TO is_instanciated_by
+            </instructions>
+            """)
 
         self.context = textwrap.dedent(f"""
         <context>
@@ -426,7 +511,8 @@ class PromptsLoader:
         In the JSON file, the added extra nodes are connected to the parent entities through a relation.
         Find an ontology property for the relation of the extra node to the parent entity. 
         Pay attention to the direction of the property to be from the extra node TO the parent entity (extra node → parent entity)!
-        Use the term_mapper tool with an appropriate query.
+        If you have Available Ontology Properties List, select the Select the most appropriate property from the Available Ontology Properties list provided above.
+        Otherwise Use the term_mapper tool with an appropriate query.
         If there are no extra nodes, leave empty.
         </instructions>
 

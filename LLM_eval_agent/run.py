@@ -155,6 +155,7 @@ class ScenarioExecutor:
         print(f"Selected ontology file: {self.ontology_path}")
 
         prompts.load_ontology_path(self.ontology_path)
+        prompts.set_mode(self.offline_mode)
 
         # Choose: Endpoint ======================================================
         print("\nChoose an API endpoint to run the scenarios on:")
