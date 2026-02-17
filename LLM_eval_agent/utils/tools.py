@@ -240,21 +240,21 @@ def term_mapper(terms: dict) -> str:
     Returns a string representation of the search results.
     """
     brick = OntologyProcessor(prompts.ontology_path)
-    search_results = brick.search(terms, top_k=22)
+    search_results = brick.search(terms, top_k=10)
     return search_results
 
-def get_endpoint_list():
+def get_endpoint_list(host_path:str):
     """
     Retrieves a list of available API endpoints from the API specification.
     """
-    spec = APISpecProcessor(prompts.api_spec_path)
+    spec = APISpecProcessor(prompts.api_spec_path, host_path=host_path)
     return spec.get_endpoint_list()
 
-def get_non_numeric_classes(target_classes: List[str]) -> List[str]:
+def get_non_numeric_classes(target_classes: List[str], classifier: str) -> List[str]:
     """
     Returns a list of non-numeric classes from the ontology that match the target classes.
     """
-    return ontology_processor.get_non_numeric_classes(target_classes)
+    return ontology_processor.get_non_numeric_classes(target_classes, classifier=classifier)
 
 def raise_error(message: str):
     """
