@@ -288,7 +288,6 @@ class ScenarioExecutor:
         raw_response = ""
 
         if getattr(self, 'offline_mode', True):
-            # --- OFFLINE MODE ---
             # --- OFFLINE MODE
             self.calculate_mapping_reference(classifier="inference")
             pyperclip.copy(prompts.context)
