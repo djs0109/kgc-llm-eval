@@ -1,156 +1,142 @@
 {
   "1": [
     {
-      "Identifying API Endpoints": {
-        "description": "Identifying and confirming the specific FIWARE API endpoint and primary identifier (id) for retrieving raw numerical values from the JSON structure.",
-        "primary_verb": "identify",
-        "bloom_level": "Knowledge",
-        "quantity": 1,
-        "human_effort_score": 8,
-        "total_human_effort": 8
-      }
+      "name": "Identifying API Endpoints",
+      "description": "Identifying and confirming the specific FIWARE API endpoint and primary identifier (id) for retrieving raw numerical values from the JSON structure.",
+      "primary_verb": "identify",
+      "bloom_level": "Knowledge",
+      "quantity": 1,
+      "human_effort_score": 8,
+      "total_human_effort": 8
     }
   ],
   "2": [
     {
-      "Extracting Semantic Distinctions": {
-        "description": "Evaluating entity attributes like type, name, and related fields to extract semantic meaning according to FIWARE guidelines.",
-        "primary_verb": "evaluate",
-        "bloom_level": "Evaluation",
-        "quantity": 3,
-        "human_effort_score": 25,
-        "total_human_effort": 75
-      }
+      "name": "Extracting Semantic Distinctions",
+      "description": "Evaluating entity attributes like type, name, and related fields to extract semantic meaning according to FIWARE guidelines.",
+      "primary_verb": "evaluate",
+      "bloom_level": "Evaluation",
+      "quantity": 3,
+      "human_effort_score": 25,
+      "total_human_effort": 75
     },
     {
-      "Validating Type Mappings": {
-        "description": "Validating that the 'type' attribute in the JSON serves as a consistent class key for all entities.",
-        "primary_verb": "validate",
-        "bloom_level": "Evaluation",
-        "quantity": 5,
-        "human_effort_score": 15,
-        "total_human_effort": 75
-      }
+      "name": "Validating Type Mappings",
+      "description": "Validating that the 'type' attribute in the JSON serves as a consistent class key for all entities.",
+      "primary_verb": "validate",
+      "bloom_level": "Evaluation",
+      "quantity": 5,
+      "human_effort_score": 15,
+      "total_human_effort": 75
     }
   ],
   "3": [
     {
-      "Entity Type Mapping": {
-        "description": "Mapping JSON entity types like Hotel and AmbientTemperatureSensor to ontology classes like rec:Building and brick:Outside_Air_Temperature_Sensor.",
-        "primary_verb": "map",
-        "bloom_level": "Application",
-        "quantity": 4,
-        "human_effort_score": 20,
-        "total_human_effort": 80
-      }
+      "name": "Entity Type Mapping",
+      "description": "Mapping JSON entity types like Hotel and AmbientTemperatureSensor to ontology classes like rec:Building and brick:Outside_Air_Temperature_Sensor.",
+      "primary_verb": "map",
+      "bloom_level": "Application",
+      "quantity": 4,
+      "human_effort_score": 20,
+      "total_human_effort": 80
     },
     {
-      "Finalizing Entity Mappings": {
-        "description": "Final re-examination and confirmation of mappings for classes like brick:PIR_Sensor to ensure consistency with the location and parent structure.",
-        "primary_verb": "finalize",
-        "bloom_level": "Synthesis",
-        "quantity": 6,
-        "human_effort_score": 18,
-        "total_human_effort": 108
-      }
+      "name": "Finalizing Entity Mappings",
+      "description": "Final re-examination and confirmation of mappings for classes like brick:PIR_Sensor to ensure consistency with the location and parent structure.",
+      "primary_verb": "finalize",
+      "bloom_level": "Synthesis",
+      "quantity": 6,
+      "human_effort_score": 18,
+      "total_human_effort": 108
     }
   ],
   "4": [
     {
-      "Identifying Numeric Classes": {
-        "description": "Analyzing the Numeric Capability Validation list to deduce which classes possess direct numeric properties based on their absence from the list.",
-        "primary_verb": "analyze",
-        "bloom_level": "Analysis",
-        "quantity": 10,
-        "human_effort_score": 30,
-        "total_human_effort": 300
-      }
+      "name": "Identifying Numeric Classes",
+      "description": "Analyzing the Numeric Capability Validation list to deduce which classes possess direct numeric properties based on their absence from the list.",
+      "primary_verb": "analyze",
+      "bloom_level": "Analysis",
+      "quantity": 10,
+      "human_effort_score": 30,
+      "total_human_effort": 300
     },
     {
-      "Refining Class Attribute Mappings": {
-        "description": "Refining the mapping of specific attributes like fan speed and setpoints, ensuring unique identifiers are correctly handled.",
-        "primary_verb": "refine",
-        "bloom_level": "Synthesis",
-        "quantity": 4,
-        "human_effort_score": 22,
-        "total_human_effort": 88
-      }
+      "name": "Refining Class Attribute Mappings",
+      "description": "Refining the mapping of specific attributes like fan speed and setpoints, ensuring unique identifiers are correctly handled.",
+      "primary_verb": "refine",
+      "bloom_level": "Synthesis",
+      "quantity": 4,
+      "human_effort_score": 22,
+      "total_human_effort": 88
     }
   ],
   "5": [
     {
-      "Validating Remaining Mappings": {
-        "description": "Deep-diving into the validation list to check for omitted classes like Supply/Return water temperature sensors to confirm their numeric status.",
-        "primary_verb": "examine",
-        "bloom_level": "Analysis",
-        "quantity": 3,
-        "human_effort_score": 35,
-        "total_human_effort": 105
-      }
+      "name": "Validating Remaining Mappings",
+      "description": "Deep-diving into the validation list to check for omitted classes like Supply/Return water temperature sensors to confirm their numeric status.",
+      "primary_verb": "examine",
+      "bloom_level": "Analysis",
+      "quantity": 3,
+      "human_effort_score": 35,
+      "total_human_effort": 105
     },
     {
-      "Confirming Class Mappings": {
-        "description": "Cross-referencing mapped classes (Thermostat, Cooling_Coil, etc.) against the numerical validation list to confirm the necessity of Extra Nodes.",
-        "primary_verb": "confirm",
-        "bloom_level": "Comprehension",
-        "quantity": 6,
-        "human_effort_score": 12,
-        "total_human_effort": 72
-      }
+      "name": "Confirming Class Mappings",
+      "description": "Cross-referencing mapped classes (Thermostat, Cooling_Coil, etc.) against the numerical validation list to confirm the necessity of Extra Nodes.",
+      "primary_verb": "confirm",
+      "bloom_level": "Comprehension",
+      "quantity": 6,
+      "human_effort_score": 12,
+      "total_human_effort": 72
     }
   ],
   "6": [
     {
-      "Mapping Supplementary Entities": {
-        "description": "Creating and mapping 'Extra Nodes' for entities on the validation list to separate Equipment from the Point (Sensor/Setpoint) that holds the value.",
-        "primary_verb": "create",
-        "bloom_level": "Synthesis",
-        "quantity": 8,
-        "human_effort_score": 45,
-        "total_human_effort": 360
-      }
+      "name": "Mapping Supplementary Entities",
+      "description": "Creating and mapping 'Extra Nodes' for entities on the validation list to separate Equipment from the Point (Sensor/Setpoint) that holds the value.",
+      "primary_verb": "create",
+      "bloom_level": "Synthesis",
+      "quantity": 8,
+      "human_effort_score": 45,
+      "total_human_effort": 360
     },
     {
-      "Refining Sensor Point Strategy": {
-        "description": "Determining specific Point subclasses (e.g., brick:Air_Temperature_Sensor) for Extra Nodes to ensure data points are correctly categorized outside the validation list.",
-        "primary_verb": "determine",
-        "bloom_level": "Evaluation",
-        "quantity": 5,
-        "human_effort_score": 40,
-        "total_human_effort": 200
-      }
+      "name": "Refining Sensor Point Strategy",
+      "description": "Determining specific Point subclasses (e.g., brick:Air_Temperature_Sensor) for Extra Nodes to ensure data points are correctly categorized outside the validation list.",
+      "primary_verb": "determine",
+      "bloom_level": "Evaluation",
+      "quantity": 5,
+      "human_effort_score": 40,
+      "total_human_effort": 200
     },
     {
-      "Mapping Thermostat Points": {
-        "description": "Implementing the creation of Point subclasses for specific numeric values within a Thermostat, such as temperatureAmb.",
-        "primary_verb": "implement",
-        "bloom_level": "Application",
-        "quantity": 2,
-        "human_effort_score": 30,
-        "total_human_effort": 60
-      }
+      "name": "Mapping Thermostat Points",
+      "description": "Implementing the creation of Point subclasses for specific numeric values within a Thermostat, such as temperatureAmb.",
+      "primary_verb": "implement",
+      "bloom_level": "Application",
+      "quantity": 2,
+      "human_effort_score": 30,
+      "total_human_effort": 60
     }
   ],
   "7": [
     {
-      "Connection Property Identification": {
-        "description": "Defining and solidifying the use of brick:isPointOf and brick:hasPoint to link Extra Nodes to their parent Equipment or Location entities.",
-        "primary_verb": "relate",
-        "bloom_level": "Application",
-        "quantity": 7,
-        "human_effort_score": 20,
-        "total_human_effort": 140
-      }
+      "name": "Connection Property Identification",
+      "description": "Defining and solidifying the use of brick:isPointOf and brick:hasPoint to link Extra Nodes to their parent Equipment or Location entities.",
+      "primary_verb": "relate",
+      "bloom_level": "Application",
+      "quantity": 7,
+      "human_effort_score": 20,
+      "total_human_effort": 140
     },
     {
-      "Finalizing Node Relationships": {
-        "description": "Validating the end-to-end connection between parent entities, child nodes, and the API endpoint for raw data.",
-        "primary_verb": "validate",
-        "bloom_level": "Evaluation",
-        "quantity": 10,
-        "human_effort_score": 25,
-        "total_human_effort": 250
-      }
+      "name": "Finalizing Node Relationships",
+      "description": "Validating the end-to-end connection between parent entities, child nodes, and the API endpoint for raw data.",
+      "primary_verb": "validate",
+      "bloom_level": "Evaluation",
+      "quantity": 10,
+      "human_effort_score": 25,
+      "total_human_effort": 250
     }
   ]
 }

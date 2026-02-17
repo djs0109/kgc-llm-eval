@@ -310,14 +310,14 @@ class PromptsLoader:
             <output>
             # OUTPUT FORMAT
             {{ <task_number>: [
-                {{ <step_name>: 
-                    {{ "description": <step description>,
-                       "primary_verb": <primary verb>,
-                       "bloom_level": <bloom level>,
-                       "quantity": <quantity>,
-                       "human_effort_score": <human effort score>,
-                       "total_human_effort": <quantity * human effort score>
-                    }}
+                {{  
+                   "name": <step name>,
+                   "description": <step description>,
+                   "primary_verb": <primary verb>,
+                   "bloom_level": <bloom level>,
+                   "quantity": <quantity>,
+                   "human_effort_score": <human effort score>,
+                   "total_human_effort": <quantity * human effort score>
                 }},
                 ... # more steps if applicable
                 ],
