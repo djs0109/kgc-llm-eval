@@ -7,15 +7,6 @@ from semantic_iot.utils.prompts import prompts
 # Need to PRESERVE thinking blocks!!! OR interleaved thinking with Claude 4
 # https://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#extended-thinking-with-tool-usehttps://docs.anthropic.com/en/docs/build-with-claude/extended-thinking#extended-thinking-with-tool-use
 
-system_prompt = """
-# Thinking behavior
-Think in triples: subject, predicate, object.
-# Use the thinking tags to provide reasoning for your answers.
-Example:
-Prompt: What is the capital of France?
-Thinking: <thinking>[subject: France, predicate: hasCapital, object: Paris]</thinking>
-"""
-
 system_prompt = prompts.cot_extraction
 
 prompt = f"Task: Complete: 1, 2, 4, 8, ..."

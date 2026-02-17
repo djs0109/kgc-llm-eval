@@ -48,6 +48,12 @@ class PromptsLoader:
         You are a semantic web engineer specializing in IoT knowledge graph development for building automation systems. 
         You work systematically, following established semantic web standards and best practices.
         </role>""")
+        self.ROLE_Evaluation = textwrap.dedent(f"""<role>
+        You are a semantic web engineer specializing in IoT knowledge graph development for building automation systems. 
+        You work systematically, following established semantic web standards and best practices.
+        You have done the tasks and have documented the complete step-by-step execution of the tasks, i.e. the reasoning process.
+        Now you need to analyze the complete step-by-step execution of the tasks and evaluate the cognitive effort and human effort of each subtask step.
+        </role>""")
         self.SYSTEM = textwrap.dedent(f"""<system>
         - Be precise and concise.
         - You may use tools, only call them when needed, then you will receive its output in the next interaction.
@@ -117,6 +123,7 @@ class PromptsLoader:
         QUANTITY = textwrap.dedent(f"""
         # QUANTITY 
         The quantity is the count of all targets of the action. The targets should be the actual objects being processed, created, or manipulated by the action, not the container or context.
+        The quantity can also be exactly 1 if the action is performed on a single object.
         Examples:
         - "parsing 5 JSON objects": quantity = 5 (cognitive operation: "parse", target: "JSON objects", not the file containing them)
         - "applying a rule to 10 data points": quantity = 10 (cognitive operation: "apply validation rule", target: "data points", not the rule)
@@ -142,6 +149,26 @@ class PromptsLoader:
         """)
         # ... rate the "cognitive" effort of this step ...?
         # and the "context" that was required.
+
+        # Tasks definition ================================================================
+        TASKS_DEFINITION_CONTEXT = textwrap.dedent(f"""
+        Predefined tasks for the context extraction.
+        The tasks are representative.
+            1. Identification of API Endpoints
+            2. Semantic Analysis of JSON Keys
+            3. Entity Type Mapping
+            4. Property Mapping
+            5. Validation of Ontology Classes
+            6. Mapping of Supplementary Entities
+            7. Connection Property Identification
+        """)
+
+        TASKS_DEFINITION_KGC = textwrap.dedent(f"""
+         8. Root Node Triple
+         9. Container-level Triple
+         10. Device-level Triple
+         11. Supplementary Entity Triple
+        """)
 
         # COT EXTRACTION PROMPT ================================================================
 
@@ -261,6 +288,43 @@ class PromptsLoader:
         </output>
         """)
 
+        # Offline CoT evaluation: analyze the CoT outputs of the LLM agents (context/Scenario I, II, III) and estimate the human effort and cognitive effort of each step
+        # TODO try for KGC as well {TASKS_DEFINITION_KGC}
+        self.cot_evaluation_context = textwrap.dedent(f"""
+            <context>
+            {BLOOM_DESCRIPTIONS}
+            {QUANTITY}
+            {HUMAN_EFFORT_INDEX}
+            {TASKS_DEFINITION_CONTEXT}
+            </context>
+            
+            <instructions>
+            {self.ROLE_Evaluation}
+            Analyze the complete step-by-step execution and allocate every step to one of the defined tasks.
+            It is possible that multiple steps belong to the same task, and it is also possible that some tasks are less represented than others.
+            After the allocation, you need to evaluate the human effort qualitatively and quantitatively.
+            # qualitative evaluation: evaluate the cognitive effort of each step based on the BLOOM'S TAXONOMY LEVELS, first identify the primary verb of the step, then allocate one cognitive level based on the verb.
+            # quantitative evaluation: first estimate the quantity of the major action in each step based on the QUANTITY definition, then rate the human effort of each action based on the HUMAN EFFORT INDEX. The total human effort score of a step is the product of the quantity and the human effort score of the action.
+            </instructions>
+            
+            <output>
+            # OUTPUT FORMAT
+            {{ <task_number>: [
+                {{ <step_name>: 
+                    {{ "description": <step description>,
+                       "primary_verb": <primary verb>,
+                       "bloom_level": <bloom level>,
+                       "quantity": <quantity>,
+                       "human_effort_score": <human effort score>,
+                       "total_human_effort": <quantity * human effort score>
+                    }}
+                }},
+                ... # more steps if applicable
+                ],
+                ... # other tasks
+            }}
+            </output>
+        """)
 
         # INPUT FILES ================================================================
 
@@ -573,7 +637,12 @@ class PromptsLoader:
 
         <output> Return the Resource Node Relationship Document in JSON format.</output>
         """)
-    
+
+    def evaluation_prompt(self, cot_content):
+        # TODO decide whether it is for scenario I, II or III or context retrieval
+        cot_content_input = f"<input>\n{cot_content}\n</input>"
+        prompt_evaluation = cot_content_input + self.cot_evaluation_context
+        return prompt_evaluation
 
     def load_prefixes(self, ontology_path):
         with open(ontology_path, 'r', encoding='utf-8') as f:
