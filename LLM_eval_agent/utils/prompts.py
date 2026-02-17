@@ -495,6 +495,7 @@ class PromptsLoader:
         self.context = textwrap.dedent(f"""
         <context>
         {self.jex}
+        {self.MAPPING_REFERENCE}
         {term_mapping_instructions}
         </context>
 
