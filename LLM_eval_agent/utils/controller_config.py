@@ -119,27 +119,20 @@ class ControllerConfiguration:
             room_uri = room_entry['room']
 
             # Query all information for the current room
-            devices_query = query_ventilation_devices.replace("<room_uri>",
-                                                              f"<{room_uri}>")
+            devices_query = query_ventilation_devices.replace("<room_uri>", f"<{room_uri}>")
             device_results = self.graph.query(devices_query)
-            self.all_query_results['devices'][str(room_uri)] = [str(row['device']) for row
-                                                                in device_results]
+            self.all_query_results['devices'][str(room_uri)] = [str(row['device']) for row in device_results]
 
-            co2_query = query_co2_sensor_availability.replace("<room_uri>",
-                                                              f"<{room_uri}>")
+            co2_query = query_co2_sensor_availability.replace("<room_uri>", f"<{room_uri}>")
             co2_sensors = self.graph.query(co2_query)
-            self.all_query_results['co2_sensors'][str(room_uri)] = [str(row['sensor']) for
-                                                                    row in co2_sensors]
+            self.all_query_results['co2_sensors'][str(room_uri)] = [str(row['sensor']) for row in co2_sensors]
 
-            presence_query = query_presence_sensor_availability.replace("<room_uri>",
-                                                                        f"<{room_uri}>")
+            presence_query = query_presence_sensor_availability.replace("<room_uri>", f"<{room_uri}>")
             presence_sensors = self.graph.query(presence_query)
-            self.all_query_results['presence_sensors'][str(room_uri)] = [
-                str(row['sensor']) for row in presence_sensors]
+            self.all_query_results['presence_sensors'][str(room_uri)] = [str(row['sensor']) for row in presence_sensors]
 
             # 1) Find ventilation devices for current room
-            devices_query = query_ventilation_devices.replace("<room_uri>",
-                                                              f"<{room_uri}>")
+            devices_query = query_ventilation_devices.replace("<room_uri>", f"<{room_uri}>")
             device_results = self.graph.query(devices_query)
 
             # Skip if no ventilation devices found
@@ -151,8 +144,7 @@ class ControllerConfiguration:
 
             # 2) Determine control logic based on sensors
             #    a) Check CO2 sensor
-            co2_query = query_co2_sensor_availability.replace("<room_uri>",
-                                                              f"<{room_uri}>")
+            co2_query = query_co2_sensor_availability.replace("<room_uri>", f"<{room_uri}>")
             co2_sensors = self.graph.query(co2_query)
 
             if co2_sensors:
@@ -162,20 +154,17 @@ class ControllerConfiguration:
 
                 print("Not checking presence sensors, using CO2 sensor for control.")
                 # Check presence sensors for KG validation
-                presence_query = query_presence_sensor_availability.replace("<room_uri>",
-                                                                            f"<{room_uri}>")
+                presence_query = query_presence_sensor_availability.replace("<room_uri>", f"<{room_uri}>")
                 presence_sensors = self.graph.query(presence_query)
 
             else:
                 # b) Check presence sensor
-                presence_query = query_presence_sensor_availability.replace("<room_uri>",
-                                                                            f"<{room_uri}>")
+                presence_query = query_presence_sensor_availability.replace("<room_uri>", f"<{room_uri}>")
                 presence_sensors = self.graph.query(presence_query)
 
                 if presence_sensors:
                     # Pick the first presence sensor
-                    sensor_access = presence_sensors.bindings[0].get('sensor_access',
-                                                                     None)
+                    sensor_access = presence_sensors.bindings[0].get('sensor_access', None)
                     controller_mode = "presence"
                 else:
                     # c) Fall back to timetable-based control

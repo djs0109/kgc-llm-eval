@@ -1,5 +1,8 @@
 from pathlib import Path
 import textwrap
+from rdflib import Graph, RDF, RDFS, OWL
+
+from sympy.logic.boolalg import Boolean
 
 
 class PromptsLoader:
@@ -22,6 +25,7 @@ class PromptsLoader:
             with open(path, "r") as f: 
                 self.templates[key] = f.read()
 
+        self.offline_mode = False
         # IN-BETWEEN VARIABLES ================================================================
 
         self.ontology_path = None
@@ -38,8 +42,105 @@ class PromptsLoader:
 
         self.rnr_content = None
         self.PC_content = None
+        self.MAPPING_REFERENCE = ""
 
         self.update_variables()
+
+    def set_mode(self, offline: bool):
+        """
+        Sets the execution mode.
+        True = Offline (Inject ontology summary into prompt).
+        False = Online (Instruct LLM to use tools).
+        """
+        self.offline_mode = offline
+        print(f"Mode switched to: {'OFFLINE (List Injection)' if offline else 'ONLINE (Tool Use)'}")
+        self.update_variables()
+
+    def get_ontology_summary(self):
+        """
+        Parse the ontology and return a formatted string of
+        available Classes and Properties with their prefixes (e.g., brick:Sensor).
+        """
+        if not self.ontology_path:
+            return "Ontology not loaded."
+
+        try:
+            g = Graph()
+            g.parse(self.ontology_path, format='turtle')
+
+            classes = set()
+            properties = set()
+
+            # 1. Extract Classes (OWL and RDFS)
+            for s in g.subjects(RDF.type, OWL.Class):
+                try:
+                    classes.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, RDFS.Class):
+                try:
+                    classes.add(g.qname(s))
+                except:
+                    pass
+
+            # 2. Extract Properties (Object and Datatype)
+            for s in g.subjects(RDF.type, OWL.ObjectProperty):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, OWL.DatatypeProperty):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, RDF.Property):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+
+            summary = f"### AVAILABLE ONTOLOGY CLASSES ###\n{', '.join(sorted(list(classes)))}\n\n"
+            summary += f"### AVAILABLE ONTOLOGY PROPERTIES ###\n{', '.join(sorted(list(properties)))}"
+            return summary
+
+        except Exception as e:
+            return f"Error parsing ontology with rdflib: {str(e)}"
+
+    def get_properties_summary(self):
+        """
+        Returns ONLY the ontology properties.
+        Lighter version of get_ontology_summary for Scenario III.
+        """
+        if not self.ontology_path:
+            return "Ontology not loaded."
+
+        try:
+            g = Graph()
+            g.parse(self.ontology_path, format='turtle')
+            properties = set()
+
+            # Extract Properties (Object, Datatype, and RDF Property)
+            for s in g.subjects(RDF.type, OWL.ObjectProperty):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, OWL.DatatypeProperty):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+            for s in g.subjects(RDF.type, RDF.Property):
+                try:
+                    properties.add(g.qname(s))
+                except:
+                    pass
+
+            return f"### AVAILABLE ONTOLOGY PROPERTIES (Use these for Inverse Lookup) ###\n{', '.join(sorted(list(properties)))}"
+
+        except Exception as e:
+            return f"Error parsing ontology: {str(e)}"
 
     def update_variables(self):
 
@@ -343,37 +444,58 @@ class PromptsLoader:
         </input>""")
 
         # CONTEXT PROMPTS ================================================================
+        if self.offline_mode:
+            # --- OFFLINE MODE: INJECT LIST ---
+            ontology_summary = self.get_ontology_summary()
 
-        term_mapping_instructions = textwrap.dedent(f"""
-        # TERM MAPPING INSTRUCTIONS: 
-        <instructions>
-        Based on the extraction of available Ontology Classes and Properties and the list of terms that need to be mapped to the ontology,
-        for each term, you need to select the most appropriate ontology class or property for the domain entity or relation.
-        Do not choose a class or property that is not in the list of available ontology classes or properties.
-        The goal is to inherit the attributes and relations from the selected Ontology Class or Property.
+            term_mapping_instructions = textwrap.dedent(f"""
+            # TERM MAPPING INSTRUCTIONS: 
+            <instructions>
+            You are currently operating in OFFLINE mode. You DO NOT have access to external tools.
 
-        MAPPING CRITERIA: (in order of priority)
-        1. Exact semantic match
-        2. Hierarchical relationship (parent/child concepts)
-        3. Functional equivalence (same purpose/behavior)
-        4. Attribute similarity (same properties/characteristics)
+            Instead, use the list below to find the correct Ontology Classes and Properties.
 
-        SPECIAL CONSIDERATIONS:
-        - Distinguish locations, systems, devices, actuation points, sensors
-        - Avoid category errors: don't confuse the thing itself with top-level infrastructure that supports the thing
+            {ontology_summary}
 
-        JUST FOR CLASSES:
-        - Respect system hierarchies (building → floor → room → equipment)
-        - If the term seems to be a relation, select a class that would have this relation as a property.
-
-        JUST FOR PROPERTIES:
-        - Maintain the original direction of the relationship (subject → predicate → object), e. g.: is_instance_of NOT EQUAL TO is_instanciated_by
-        </instructions>
-        """)
+            MAPPING CRITERIA:
+            1. Look for an Exact semantic match in the list above.
+            2. If no exact match, look for a parent concept (e.g., use 'brick:Sensor' if 'brick:CO2Sensor' is missing).
+            3. Do NOT invent classes that are not in the list.
+            </instructions>
+            """)
+        else:
+            # --- ONLINE MODE: TOOL USE ---
+            term_mapping_instructions = textwrap.dedent(f"""
+            # TERM MAPPING INSTRUCTIONS: 
+            <instructions>
+            Based on the extraction of available Ontology Classes and Properties and the list of terms that need to be mapped to the ontology,
+            for each term, you need to select the most appropriate ontology class or property for the domain entity or relation.
+            Do not choose a class or property that is not in the list of available ontology classes or properties.
+            The goal is to inherit the attributes and relations from the selected Ontology Class or Property.
+    
+            MAPPING CRITERIA: (in order of priority)
+            1. Exact semantic match
+            2. Hierarchical relationship (parent/child concepts)
+            3. Functional equivalence (same purpose/behavior)
+            4. Attribute similarity (same properties/characteristics)
+    
+            SPECIAL CONSIDERATIONS:
+            - Distinguish locations, systems, devices, actuation points, sensors
+            - Avoid category errors: don't confuse the thing itself with top-level infrastructure that supports the thing
+    
+            JUST FOR CLASSES:
+            - Respect system hierarchies (building → floor → room → equipment)
+            - If the term seems to be a relation, select a class that would have this relation as a property.
+    
+            JUST FOR PROPERTIES:
+            - Maintain the original direction of the relationship (subject → predicate → object), e. g.: is_instance_of NOT EQUAL TO is_instanciated_by
+            </instructions>
+            """)
 
         self.context = textwrap.dedent(f"""
         <context>
         {self.jex}
+        {self.MAPPING_REFERENCE}
         {term_mapping_instructions}
         </context>
 
@@ -426,7 +548,8 @@ class PromptsLoader:
         In the JSON file, the added extra nodes are connected to the parent entities through a relation.
         Find an ontology property for the relation of the extra node to the parent entity. 
         Pay attention to the direction of the property to be from the extra node TO the parent entity (extra node → parent entity)!
-        Use the term_mapper tool with an appropriate query.
+        If you have Available Ontology Properties List, select the Select the most appropriate property from the Available Ontology Properties list provided above.
+        Otherwise Use the term_mapper tool with an appropriate query.
         If there are no extra nodes, leave empty.
         </instructions>
 
@@ -613,15 +736,57 @@ class PromptsLoader:
         <output> Return the Platform Configuration file in JSON format.</output>
         """)
 
+        properties_only = self.get_properties_summary()
+
+        ontology_constraints_instruction = """
+        ### CRITICAL: ONTOLOGY DIRECTIONALITY RULES
+        You must strictly respect the 'Domain' and 'Range' of the ontology properties.
+        When defining a relationship: "CurrentNode (Subject) -> Property -> RelatedNode (Object)":
+
+        1. **Check Direction:** Ensure the chosen property is defined in the ontology to flow FROM the Subject's class TO the Object's class.
+        2. **Avoid Inversion:** - If a property `P` is defined as `A -> P -> B`, do NOT use it for `B -> A`.
+           - Instead, search for the **inverse property** (e.g., use `hasPart` instead of `isPartOf`, or `contains` instead of `containedIn`).
+        3. **Logic Check:** - Incorrect: `House (Subject) -> isLocationOf -> Room (Object)` (Implies the House is inside the Room).
+           - Correct: `House (Subject) -> hasLocation -> Room (Object)` OR `House (Subject) -> contains -> Room (Object)`.
+
+        **Verification Step:** Before outputting a property, ask yourself: "Does the ontology define [Current Class] as the DOMAIN of this property?"
+        """
+
+        # Extract the relationship from context (dynamic), or use a generic placeholder if missing
+        relation = self.context_content.get('extra_node_relation_to_parent',
+                                            'Child_To_Parent_Relation') if self.context_content else 'Child_To_Parent_Relation'
         self.prompt_III = textwrap.dedent(f"""
         <context>
         {self.jex}
-        # RESULTS OF PREPROCESSING OF THE JSON FILE: \n{self.context_content} \n The mapping of the relatedTo relation to the ontology property is {self.context_content['extra_node_relation_to_parent'] if self.context_content else 'value of extra_node_relation_to_parent key'}.
+        # HELPFUL DEFINITIONS
+        {properties_only}
+        # RESULTS OF PREPROCESSING OF THE JSON FILE: \n{self.context_content}
+        # RELATIONSHIP CONTEXT
+        The preprocessing determined that the Extra Node relates to the Parent via: {relation}.
+        (Direction: Extra Node -> Parent)
         {self.PC}
         {self.RNR}
         </context>
 
         <instructions>
+        {ontology_constraints_instruction}
+        
+        ### CRITICAL: DO NOT DELETE EXTRA NODES
+        The "node_relationship.json" input contains "Extra Nodes" (derived from numerical properties).
+        You MUST preserve these nodes in your output.
+        If the preprocessor generated a node (e.g., for 'fanSpeed', 'setpoint', or 'sensor'), KEEP IT in the list.
+
+        ### HANDLING EXTRA NODE RELATIONSHIPS
+        The context provides the relationship "{relation}" which describes the link from **Child (Extra Node) -> Parent**.
+        However, in the "Resource Node Relationship Document", you are defining the properties of the **Parent Node**.
+        
+        **CRITICAL INSTRUCTION:**
+        1. You must define the relationship from the perspective of the Parent (Parent -> Child).
+        2. Therefore, do NOT use "{relation}".
+        3. Instead, find and use the **INVERSE property** from the selected ontology.
+           - Example Concept: If the context says 'isPart of' (Child->Parent), you MUST use 'hasPart' (Parent->Child).
+           - Apply this logic to the specific ontology terms you are using.
+
         Fill out the preprocessed Resource Node Relationship Document based on the results of Preprocessing of the JSON file.
 
         Preserve the structure and strictly do not change ANYTHING in the Resource Node Relationship Document except:
@@ -629,8 +794,11 @@ class PromptsLoader:
             - Ignore any prefilled value and replace it with the mapped {{ONTOLOGY_CLASS}} for the "nodetype" value of the entity.
         - For the value of every "property" key:
             - Ignore any prefilled value and replace it with the mapped {{ONTOLOGY_PROPERTY}} for the "rawdataidentifier" value of the entity.
+        - For the value of every "rawdataidentifier" key:
+            - If this is a relationship to an **Extra Node**: Set it to "id".
+            - Otherwise: Keep the existing value.        
         - For the value of every "hasdataaccess" key: 
-            - If entity has a numerical property: Ignore any prefilled value, replace it with the template {{API_ENDPOINT_URL}} and adapt its variables to match the attribute of this entity and '{id}' instead of the ID_KEY for the API call.
+            - If entity has a numerical property: Ignore any prefilled value, replace it with the template {{API_ENDPOINT_URL}} and adapt its variables to match the attribute of this entity and '{{id}}' instead of the ID_KEY for the API call.
             - If an entity has an associated extra node, fill out the API_ENDPOINT_URL just for the extra node, not for the original entity.
         Terms in brackets {{}} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
         </instructions>

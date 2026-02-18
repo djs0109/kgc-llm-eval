@@ -5,11 +5,13 @@ import json
 import time
 import pyperclip
 import sys
+import re
 # from mermaid import
 
 from LLM_eval_agent.utils import LLMAgent
 from LLM_eval_agent.utils import prompts
-
+from LLM_eval_agent.utils.tools import term_mapper, get_non_numeric_classes
+from LLM_eval_agent.utils.tools import get_endpoint_list
 from LLM_eval_agent.utils.tools import generate_rdf_from_rml, reasoning, generate_controller_configuration, term_mapper, get_endpoint_from_api_spec, generate_rml_from_rnr, generate_rdf_from_rml, preprocess_json
 
 timestamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
@@ -97,6 +99,55 @@ class ScenarioExecutor:
         self.api_spec_folder = api_spec_folder if api_spec_folder else Path(datasets_path.parent, "API_specs")
         self.test = test
 
+    def calculate_mapping_reference(self, classifier="inference"):
+        """
+        Gathers all necessary ontology information locally to create the 'Super-Prompt'.
+        This allows the LLM to provide the final context in a single query.
+        """
+        print(f"\nCalculating Mapping Reference (Classifier: {classifier})...")
+        try:
+            with open(self.JEX_path, 'r', encoding='utf-8') as f:
+                jex_data = json.load(f)
+
+            terms = {}
+            # Support both a list of entities or a dictionary of entities
+            entities = jex_data if isinstance(jex_data, list) else jex_data.values()
+
+            for entity in entities:
+                if not isinstance(entity, dict): continue
+                for k, v in entity.items():
+                    # Every key in the JSON is a potential property
+                    terms[k] = "property"
+                    # Values of type-related keys are potential classes
+                    if k.lower() in ['type', 'category', '@type']:
+                        if isinstance(v, str):
+                            terms[v] = "class"
+
+            mapping_text = term_mapper(terms)
+
+            # Extract a list of unique class identifiers (e.g., 'module:ClassName') from the text
+            found_classes = list(set(re.findall(r'[a-zA-Z0-9]+:[A-Z][a-zA-Z0-9_]+', mapping_text)))
+            non_numeric_list = get_non_numeric_classes(found_classes, classifier=classifier)
+            api_endpoints = get_endpoint_list(host_path=self.host_path)
+
+            # 4. Construct the final Reference Block
+            reference_block = f"--- ONTOLOGY MAPPING SUGGESTIONS ---\n{mapping_text}\n\n"
+            reference_block += f"--- AVAILABLE API ENDPOINTS ---\n{api_endpoints}\n\n"
+            reference_block += f"--- NUMERIC CAPABILITY VALIDATION ---\n"
+            reference_block += "The following classes were found to lack direct numeric properties. "
+            reference_block += "If you map an entity to these, you MUST create an Extra Node:\n"
+            reference_block += ", ".join(non_numeric_list) if non_numeric_list else "None (all support direct values)."
+
+            prompts.MAPPING_REFERENCE = reference_block
+            prompts.update_variables()
+
+            print("Mapping Reference successfully injected into the context prompt.")
+
+        except Exception as e:
+            print(f"Warning: Failed to pre-calculate mapping reference: {e}")
+            prompts.MAPPING_REFERENCE = "Error pre-calculating reference. Please use tools or general knowledge."
+            prompts.update_variables()
+
     def choose_dataset(self):
 
         # TODO improve: implement select file class and reuse
@@ -155,6 +206,7 @@ class ScenarioExecutor:
         print(f"Selected ontology file: {self.ontology_path}")
 
         prompts.load_ontology_path(self.ontology_path)
+        prompts.set_mode(self.offline_mode)
 
         # Choose: Endpoint ======================================================
         print("\nChoose an API endpoint to run the scenarios on:")
@@ -236,7 +288,8 @@ class ScenarioExecutor:
         raw_response = ""
 
         if getattr(self, 'offline_mode', True):
-            # --- OFFLINE MODE ---
+            # --- OFFLINE MODE
+            self.calculate_mapping_reference(classifier="inference")
             pyperclip.copy(prompts.context)
 
             print("👉 Paste the prompt above into Gemini.")
@@ -358,7 +411,7 @@ class ScenarioExecutor:
                     prompts.result_folder = scenario_folder[sc]
 
                     print(f"\n--- Running scenario {sc} ---")
-
+                    prompts.update_variables()
                     current_prompt = prompt[sc]
                     # Initialize Agent
                     client_scenario = LLMAgent(

@@ -229,6 +229,9 @@ class OntologyPropertyAnalyzer:
         for prefix, namespace in self.ont.namespaces():
             target_kg.bind(prefix, namespace)
         target_kg.bind('rdf', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#')
+        target_kg.bind('owl', 'http://www.w3.org/2002/07/owl#')
+        target_kg.bind('xsd', 'http://www.w3.org/2001/XMLSchema#')
+
         target_class_uris = [self._string_to_uri(self.ont, target_class) for target_class in target_classes]
 
         # Add all triples where subject is one of the target classes
@@ -240,47 +243,44 @@ class OntologyPropertyAnalyzer:
 
         # Perform RDFS inference on the target KG
         target_kg.serialize("target_kg.ttl", format='turtle')
+        inferred_path = inference_owlrl("target_kg.ttl", self.ontology_path, "target_kg_inferred.ttl")
 
-        inference_owlrl("target_kg.ttl", self.ontology_path, "target_kg_inferred.ttl")
+        inferred_graph = Graph()
+        inferred_graph.parse(str(inferred_path), format='turtle')
 
-        # RDF value is not being inherited
-
+        # Corrected SPARQL: Selects properties that are DatatypeProperties or have numeric ranges
         sparql_query = """
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-
-            SELECT ?subject ?value
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+            PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+            SELECT DISTINCT ?prop 
             WHERE {
-                ?subject rdf:value ?value .
+                { ?prop rdf:type owl:DatatypeProperty . }
+                UNION
+                { ?prop rdfs:range xsd:double . }
+                UNION
+                { ?prop rdfs:range xsd:float . }
+                UNION
+                { ?prop rdfs:range xsd:integer . }
             }
         """
 
-        results = target_kg.query(sparql_query)
-
-        print(f"Found {len(results)} results in the target KG:")
-        print(results)
+        results = inferred_graph.query(sparql_query)
+        print(f"Found {len(results)} numeric properties through inference.")
 
         numerical_properties = set()
-        non_numerical_properties = set()
         for row in results:
-            subject = row['subject']
-            value = row['value']
+            numerical_properties.add(row['prop'])
 
-            # Check if the value is a literal and can be converted to a float
-            if isinstance(value, rdflib.Literal):
-                try:
-                    float(value)
-                    numerical_properties.add(subject)
-                except ValueError:
-                    non_numerical_properties.add(subject)
-
-        print(f"[GetNonNumericClasses] Numerical properties: {numerical_properties}")
-        print(f"[GetNonNumericClasses] Non-numerical properties: {non_numerical_properties}")
+        # All properties passed in that aren't numeric are considered non-numeric
+        all_props_uris = [self._string_to_uri(self.ont, p) for p in inherited_properties]
+        non_numerical_properties = [p for p in all_props_uris if p not in numerical_properties]
 
         return {
             'numerical': [self._uri_to_string(prop) for prop in numerical_properties],
             'non_numerical': [self._uri_to_string(prop) for prop in non_numerical_properties]
         }
-
 
     def get_non_numeric_classes(self, target_classes: list, classifier: str = "LLM") -> list:
         """
