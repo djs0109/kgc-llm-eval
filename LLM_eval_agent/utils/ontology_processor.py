@@ -145,7 +145,7 @@ class OntologyProcessor:
             else:
                 chunk = label
 
-            print(chunk)
+            #print(chunk)
 
             embedding = self.embedding_model.encode(chunk, convert_to_tensor=True)
 

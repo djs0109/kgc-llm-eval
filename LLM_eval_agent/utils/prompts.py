@@ -539,11 +539,16 @@ class PromptsLoader:
         You need to make sure, that those entities that need to have a numerical value in the JSON, also can have a numerical value in the ontology.
         Therefore you need to check if the selected ontology class for the entity having a numerical value supports having a numerical property, either directly or through inheritance.
         
-        If gaps exist and additional structural elements are needed, create supplementary entities to fill these gaps, creating a valid connection of the original entity and a numeric property.
+        ### EXTRA NODE CREATION RULES (ONTOLOGY-AGNOSTIC SEMANTICS) ###
+        In semantic modeling for IoT, there is a strict separation between physical/spatial things and data streams. You MUST follow these conceptual rules when deciding whether to create an extra node for a numerical property:
         
-        If there are the newly created entities (extra nodes), they need to be mapped to ontology classes as well.
-        It should be ensured that these new ontology classes now have the numerical property capabilities, either directly or through inheritance.
-        The entire structure requires assessment to ensure all numerical property requirements are properly addressed. This verification and enhancement process should continue until the mapping is complete and all numerical values have appropriate ontological representation.
+        1. NO EXTRA NODES FOR TELEMETRY/DATA ENTITIES (Sensors, Setpoints, Commands, Statuses):
+        If the mapped ontology class inherently represents a data stream, measurement, observation, or control point, you MUST NOT create an extra node. These classes are conceptually designed to hold numerical values directly. **This rule overrides the NUMERIC CAPABILITY VALIDATION list.**
+        *(Example in Brick ontology: Subclasses of `brick:Point` like `brick:Temperature_Sensor` or `brick:CO2_Setpoint` do not get extra nodes. Example in SAREF: `saref:Sensor` or `saref:Measurement`).*
+        
+        2. EXTRA NODES REQUIRED FOR EQUIPMENT, SYSTEMS & LOCATIONS:
+        If the mapped ontology class represents a physical device, piece of equipment, abstract system, or spatial location, it CANNOT hold a telemetry numerical value directly. You MUST create a supplementary entity ("extra node") that represents the specific data point (like a Setpoint, Command, or Sensor) to hold the numerical value.
+        *(Example in Brick ontology: `brick:Ventilation_Air_System` requires an extra node like `brick:Air_Flow_Setpoint` to hold the actual number).*
 
         For each extra node you create, you must define the relationships connecting it to its parent entity in BOTH directions:
         1. "child_to_parent_relation": The property from the extra node TO the parent entity (extra node → parent entity).
