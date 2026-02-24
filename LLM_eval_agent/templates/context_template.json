@@ -10,8 +10,9 @@
         {
             "non_numeric_parent_class": "",
             "numeric_property": "",
-            "mapped_ontology_class": ""
+            "mapped_ontology_class": "",
+            "parent_to_child_relation": "...",
+            "child_to_parent_relation": "..."
         }
-    ],
-    "extra_node_relation_to_parent": ""
+    ]
 }

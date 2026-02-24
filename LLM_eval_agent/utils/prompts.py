@@ -545,12 +545,12 @@ class PromptsLoader:
         It should be ensured that these new ontology classes now have the numerical property capabilities, either directly or through inheritance.
         The entire structure requires assessment to ensure all numerical property requirements are properly addressed. This verification and enhancement process should continue until the mapping is complete and all numerical values have appropriate ontological representation.
 
-        In the JSON file, the added extra nodes are connected to the parent entities through a relation.
-        Find an ontology property for the relation of the extra node to the parent entity. 
-        Pay attention to the direction of the property to be from the extra node TO the parent entity (extra node → parent entity)!
-        If you have Available Ontology Properties List, select the Select the most appropriate property from the Available Ontology Properties list provided above.
-        Otherwise Use the term_mapper tool with an appropriate query.
-        If there are no extra nodes, leave empty.
+        For each extra node you create, you must define the relationships connecting it to its parent entity in BOTH directions:
+        1. "child_to_parent_relation": The property from the extra node TO the parent entity (extra node → parent entity).
+        2. "parent_to_child_relation": The inverse property from the parent entity TO the extra node (parent entity → extra node).
+        
+        Select the most appropriate properties from the Available Ontology Properties list provided above. Otherwise, use the term_mapper tool with an appropriate query. Do not use a global relation; define these strictly within each extra node's object.
+        If there are no extra nodes, leave the list empty.
         </instructions>
 
         <output>{self.templates['context']}</output>
@@ -647,8 +647,7 @@ class PromptsLoader:
         - System hierarchies, the datamodel relationships and devices and their locations must be properly represented through join conditions and their child and parent
 
         In the JSON file, the added extra nodes are connected to the parent entities through a 'relatedTo' relation, with the parent entity's 'id' as value.
-        The according ontology property is the extra_node_relation_to_parent from the context.
-
+        The according ontology property is the specific "child_to_parent_relation" defined for that exact extra node in the context.
         Uppercase terms in brackets {{}} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
         For the '{{id}}', use the value of the identifier_key from the context.
         </instructions>
@@ -752,9 +751,6 @@ class PromptsLoader:
         **Verification Step:** Before outputting a property, ask yourself: "Does the ontology define [Current Class] as the DOMAIN of this property?"
         """
 
-        # Extract the relationship from context (dynamic), or use a generic placeholder if missing
-        relation = self.context_content.get('extra_node_relation_to_parent',
-                                            'Child_To_Parent_Relation') if self.context_content else 'Child_To_Parent_Relation'
         self.prompt_III = textwrap.dedent(f"""
         <context>
         {self.jex}
@@ -762,8 +758,7 @@ class PromptsLoader:
         {properties_only}
         # RESULTS OF PREPROCESSING OF THE JSON FILE: \n{self.context_content}
         # RELATIONSHIP CONTEXT
-        The preprocessing determined that the Extra Node relates to the Parent via: {relation}.
-        (Direction: Extra Node -> Parent)
+        The extra nodes and their specific parent/child relationships are defined in the RESULTS OF PREPROCESSING section above under "extra_nodes".
         {self.PC}
         {self.RNR}
         </context>
@@ -777,16 +772,12 @@ class PromptsLoader:
         If the preprocessor generated a node (e.g., for 'fanSpeed', 'setpoint', or 'sensor'), KEEP IT in the list.
 
         ### HANDLING EXTRA NODE RELATIONSHIPS
-        The context provides the relationship "{relation}" which describes the link from **Child (Extra Node) -> Parent**.
-        However, in the "Resource Node Relationship Document", you are defining the properties of the **Parent Node**.
-        
+        In the "Resource Node Relationship Document", you are defining the properties of the **Parent Node**. 
+               
         **CRITICAL INSTRUCTION:**
         1. You must define the relationship from the perspective of the Parent (Parent -> Child).
-        2. Therefore, do NOT use "{relation}".
-        3. Instead, find and use the **INVERSE property** from the selected ontology.
-           - Example Concept: If the context says 'isPart of' (Child->Parent), you MUST use 'hasPart' (Parent->Child).
-           - Apply this logic to the specific ontology terms you are using.
-
+        2. Look up the specific extra node in the context provided above.
+        3. Use the exact "parent_to_child_relation" value defined for that specific extra node. Do not use the "child_to_parent_relation".
         Fill out the preprocessed Resource Node Relationship Document based on the results of Preprocessing of the JSON file.
 
         Preserve the structure and strictly do not change ANYTHING in the Resource Node Relationship Document except:
