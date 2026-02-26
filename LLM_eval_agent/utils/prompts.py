@@ -633,11 +633,11 @@ class PromptsLoader:
         ### Iterator Constraints <constraints> 
         Put iterator in single quotes.
         Avoid using spaces in the iterator string!
-        Ensure all JSONPath expressions use simple, widely supported operators.
-        - Allowed: '$', '*', '.'
-        - Not allowed: '?', '@', filter expressions
+        Ensure that your iterator explicitly filters for the exact entity type mapping to the TriplesMap.
+        - Example: '$.[?(@.type=="Hotel")]'
+        - You MUST use filter expressions ('?', '@') to prevent the mapping from applying to the wrong JSON objects.
         </constraints>
-
+        
         Each TriplesMap must define a rr:subjectMap with
         rr:template "http://example.com/{{ENTITY_TYPE}}/{id}" for dynamic URI generation from data and rr:class {{ONTOLOGY_CLASS}} for type classification
         

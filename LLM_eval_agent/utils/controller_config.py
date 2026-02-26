@@ -11,9 +11,12 @@ ENDPOINT_URL = "http://example.org/sparql"
 # formatting)
 query_rooms = """
     PREFIX rec: <https://w3id.org/rec#>
+    PREFIX brick: <https://brickschema.org/schema/Brick#>
+    
     SELECT DISTINCT ?room
     WHERE {
-        ?room a rec:Room
+        ?room a ?room_type .
+        FILTER (?room_type IN (rec:Room, brick:Room)) 
     }
 """
 
@@ -24,8 +27,9 @@ query_ventilation_devices = """
 
     SELECT ?device ?actuation ?actuation_access
     WHERE {
-      <room_uri> a rec:Room .
-
+      <room_uri> a ?room_type .
+      FILTER (?room_type IN (rec:Room, brick:Room)) .
+      
       ?device a ?device_type .
       FILTER (?device_type IN (brick:Air_System, brick:Variable_Air_Volume_Box))
       ?actuation (brick:isPointOf|brick:hasLocation|brick:isPartOf) ?device .
@@ -49,7 +53,8 @@ query_co2_sensor_availability = """
 
     SELECT ?sensor ?sensor_access
     WHERE {
-        <room_uri> a rec:Room .
+        <room_uri> a ?room_type .
+        FILTER (?room_type IN (rec:Room, brick:Room))
         ?sensor a brick:CO2_Sensor . 
         ?sensor rdf:value ?sensor_access .                                                
         ?sensor (brick:isPointOf|brick:hasLocation|brick:isPartOf)* <room_uri>.
@@ -63,7 +68,8 @@ query_presence_sensor_availability = """
 
     SELECT ?sensor ?sensor_access
     WHERE {
-        <room_uri> a rec:Room .
+        <room_uri> a ?room_type .
+        FILTER (?room_type IN (rec:Room, brick:Room))
         ?sensor a ?sensor_type .
         FILTER (?sensor_type IN (brick:Occupancy_Sensor, brick:PIR_Sensor))
         ?sensor rdf:value ?sensor_access .
