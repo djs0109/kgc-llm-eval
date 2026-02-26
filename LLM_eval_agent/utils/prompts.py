@@ -698,22 +698,23 @@ class PromptsLoader:
         PC_template = f"<template>\n{self.templates['config']}\n</template>"
         PC_content = f"Content: <data>{self.PC_content}</data>"
         self.PC = textwrap.dedent(f""" 
-        # PLATFORM CONFIGURATION FILE
-        The configuration file should contain the following information:
-        - The ID_KEY is the key in the JSON data that uniquely identifies each entity and is equal to the identifier_key in the context
-        - The TYPE_KEYS are the keys in the JSON data that identify the type of each entity and is equal to the class_keys in the context
-        - The JSONPATH_EXTRA_NODES are the JSONpath Expressions to the {{EXTRA_NODES}} that should be included in the mapping. 
-                                  
-        <constraints>
-        Ensure all JSONPath expressions use simple, widely supported operators. Note the type of the root level object in the JSON file. 
-        - Allowed: '$', '*', '.'
-        - Not allowed: '?', '@', filter expressions
-        </constraints>
-        
-        Terms in brackets {{}} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+                # PLATFORM CONFIGURATION FILE
+                The configuration file should contain the following information:
+                - The ID_KEY is the key in the JSON data that uniquely identifies each entity and is equal to the identifier_key in the context
+                - The TYPE_KEYS are the keys in the JSON data that identify the type of each entity and is equal to the class_keys in the context
+                - The JSONPATH_EXTRA_NODES are the JSONpath Expressions to the {{EXTRA_NODES}} that should be included in the mapping. 
 
-        {PC_content if self.PC_content else PC_template}
-        """) # Use the recursive descent operator
+                <constraints>
+                Ensure that your JSONPath explicitly filters for the parent entity object that contains the extra node.
+                - Example: '$.[?(@.type=="CoolingCoil")]' or '$.[?(@.fanSpeed)]'
+                - You MUST use filter expressions ('?', '@') so the iterator stays at the root entity level where the "id" key is located. 
+                - DO NOT step into the numerical property itself (e.g., do NOT use '$[*].fanSpeed' or '$..fanSpeed').
+                </constraints>
+
+                Terms in brackets {{}} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+
+                {PC_content if self.PC_content else PC_template}
+                """)
 
         
         self.RNR = textwrap.dedent(f"""
