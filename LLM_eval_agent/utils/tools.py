@@ -1,4 +1,4 @@
-
+import tempfile
 from typing import Dict, Any, List, Optional, Callable, Union
 import os
 from pathlib import Path
@@ -357,15 +357,30 @@ def generate_rdf_from_rml(json_file_path: str, rml_file_path: str, output_rdf_fi
     """
     Generates RDF data from the JSON file using the RML mapping file.
     """
-    rdf_generator = RDFGenerator(
-        mapping_file=rml_file_path,
-        platform_config=platform_config
-    )
-    rdf_generator.generate_rdf(
-        source_file=json_file_path,
-        destination_file=output_rdf_file_path,
-        engine="morph-kgc"
-    )
+    temp_config_path = None
+
+    # If no platform_config is provided, create a temporary one to satisfy the external library
+    if not platform_config or not os.path.exists(platform_config):
+        fd, temp_config_path = tempfile.mkstemp(suffix=".json", text=True)
+        with os.fdopen(fd, 'w') as f:
+            # Inject the default values the library expects
+            json.dump({"ID_KEY": "id", "TYPE_KEYS": ["type"]}, f)
+        platform_config = temp_config_path
+
+    try:
+        rdf_generator = RDFGenerator(
+            mapping_file=rml_file_path,
+            platform_config=platform_config
+        )
+        rdf_generator.generate_rdf(
+            source_file=json_file_path,
+            destination_file=output_rdf_file_path,
+            engine="morph-kgc"
+        )
+    finally:
+        # Clean up the temporary file
+        if temp_config_path and os.path.exists(temp_config_path):
+            os.remove(temp_config_path)
 
 def reasoning(target_kg_path: str, ontology_path: str, extended_kg_filename: str):
     """
