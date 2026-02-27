@@ -1,0 +1,175 @@
+
+        <context>
+        <input>
+        # JSON EXAMPLE FILE
+        The JSON Example file is a sample data file that contains all unique entity types of the JSON response of a GET request to the API of an IoT platform.
+        It represents the data structure of the literal entities of a building and its systematic components, available sensors and actuators, but with only one instance of each entity type.
+        content: <data>
+[
+    {
+        "id": "Hotel:hotel",
+        "type": "Hotel",
+        "name": {
+            "type": "Text",
+            "value": "hotel",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "AmbientTemperatureSensor",
+        "type": "AmbientTemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "Hotel:hotel",
+            "metadata": {}
+        },
+        "temperatureAmb": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "HotelRoom:fiware_room_base_1_v1",
+        "type": "HotelRoom",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "Hotel:hotel",
+            "metadata": {}
+        },
+        "name": {
+            "type": "Text",
+            "value": "fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "TemperatureSensor:fiware_room_base_1_v1",
+        "type": "TemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "temperature": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "CO2Sensor:fiware_room_base_1_v1",
+        "type": "CO2Sensor",
+        "co2": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "PresenceSensor:fiware_room_base_1_v1",
+        "type": "PresenceSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "pir": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "FreshAirVentilation:fiware_room_base_1_v1",
+        "type": "FreshAirVentilation",
+        "airFlowSetpoint": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "RadiatorThermostat:fiware_room_base_1_v1",
+        "type": "RadiatorThermostat",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "temperatureSetpoint": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "CoolingCoil:fiware_room_base_1_v1",
+        "type": "CoolingCoil",
+        "fanSpeed": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    }
+]</data>
+        </input>
+        # RESULTS OF PREPROCESSING OF THE JSON FILE:
+{'api_endpoint': 'https://fiware.eonerc.rwth-aachen.de/v2/entities/{entityId}/attrs/{attrName}/value', 'identifier_key': 'id', 'class_keys': ['type'], 'class_mappings': {'Hotel': 'brick:Building', 'AmbientTemperatureSensor': 'brick:Outside_Air_Temperature_Sensor', 'HotelRoom': 'brick:Room', 'TemperatureSensor': 'brick:Air_Temperature_Sensor', 'CO2Sensor': 'brick:CO2_Level_Sensor', 'PresenceSensor': 'brick:PIR_Sensor', 'FreshAirVentilation': 'brick:Ventilation_Air_System', 'RadiatorThermostat': 'brick:Radiator', 'CoolingCoil': 'brick:Cooling_Coil'}, 'numerical_properties': ['temperatureAmb', 'temperature', 'co2', 'pir', 'airFlowSetpoint', 'temperatureSetpoint', 'fanSpeed'], 'relational_properties': ['hasLocation'], 'relational_property_mappings': {'hasLocation': 'brick:hasLocation'}, 'extra_nodes': [{'non_numeric_parent_class': 'brick:Ventilation_Air_System', 'numeric_property': 'airFlowSetpoint', 'mapped_ontology_class': 'brick:Air_Flow_Setpoint', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}, {'non_numeric_parent_class': 'brick:Radiator', 'numeric_property': 'temperatureSetpoint', 'mapped_ontology_class': 'brick:Temperature_Setpoint', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}, {'non_numeric_parent_class': 'brick:Cooling_Coil', 'numeric_property': 'fanSpeed', 'mapped_ontology_class': 'brick:Speed_Status', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}]}
+
+                # PLATFORM CONFIGURATION FILE
+                The configuration file should contain the following information:
+                - The ID_KEY is the key in the JSON data that uniquely identifies each entity and is equal to the identifier_key in the context
+                - The TYPE_KEYS are the keys in the JSON data that identify the type of each entity and is equal to the class_keys in the context
+                - The JSONPATH_EXTRA_NODES are the JSONpath Expressions to the {EXTRA_NODES} that should be included in the mapping.
+
+                <constraints>
+                Ensure that your JSONPath explicitly filters for the parent entity object that contains the extra node.
+                - Example: '$.[?(@.type=="CoolingCoil")]' or '$.[?(@.fanSpeed)]'
+                - You MUST use filter expressions ('?', '@') so the iterator stays at the root entity level where the "id" key is located.
+                - DO NOT step into the numerical property itself (e.g., do NOT use '$[*].fanSpeed' or '$..fanSpeed').
+                </constraints>
+
+                Terms in brackets {} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+
+                <template>
+{
+    "ID_KEY": "<uniqueIdentifierOfAnEntity>",
+    "TYPE_KEYS": [
+        "<uniqueIdentifierOfAnTypeOfTheEntity>",
+        "<...>"
+    ],
+
+    "JSONPATH_EXTRA_NODES": [
+        "<jsonpath_expression_of_extra_node_1>",
+        "<jsonpath_expression_of_extra_node_2>",
+        "<...>"
+    ]
+}
+
+
+</template>
+
+        </context>
+
+        <instructions>
+        Generate the Platform Configuration file based on the JSON Example file.
+        Consider extra nodes if present in the context.
+        </instructions>
+
+        <output> Return the Platform Configuration file in JSON format.</output>

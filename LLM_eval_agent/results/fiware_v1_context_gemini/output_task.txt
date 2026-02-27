@@ -1,0 +1,56 @@
+{
+    "api_endpoint": "https://fiware.eonerc.rwth-aachen.de/v2/entities/{entityId}/attrs/{attrName}/value",
+    "identifier_key": "id",
+    "class_keys": [
+        "type"
+    ],
+    "class_mappings": {
+        "Hotel": "brick:Building",
+        "AmbientTemperatureSensor": "brick:Outside_Air_Temperature_Sensor",
+        "HotelRoom": "brick:Room",
+        "TemperatureSensor": "brick:Air_Temperature_Sensor",
+        "CO2Sensor": "brick:CO2_Level_Sensor",
+        "PresenceSensor": "brick:PIR_Sensor",
+        "FreshAirVentilation": "brick:Ventilation_Air_System",
+        "RadiatorThermostat": "brick:Radiator",
+        "CoolingCoil": "brick:Cooling_Coil"
+    },
+    "numerical_properties": [
+        "temperatureAmb",
+        "temperature",
+        "co2",
+        "pir",
+        "airFlowSetpoint",
+        "temperatureSetpoint",
+        "fanSpeed"
+    ],
+    "relational_properties": [
+        "hasLocation"
+    ],
+    "relational_property_mappings": {
+        "hasLocation": "brick:hasLocation"
+    },
+    "extra_nodes": [
+        {
+            "non_numeric_parent_class": "brick:Ventilation_Air_System",
+            "numeric_property": "airFlowSetpoint",
+            "mapped_ontology_class": "brick:Air_Flow_Setpoint",
+            "parent_to_child_relation": "brick:hasPoint",
+            "child_to_parent_relation": "brick:isPointOf"
+        },
+        {
+            "non_numeric_parent_class": "brick:Radiator",
+            "numeric_property": "temperatureSetpoint",
+            "mapped_ontology_class": "brick:Temperature_Setpoint",
+            "parent_to_child_relation": "brick:hasPoint",
+            "child_to_parent_relation": "brick:isPointOf"
+        },
+        {
+            "non_numeric_parent_class": "brick:Cooling_Coil",
+            "numeric_property": "fanSpeed",
+            "mapped_ontology_class": "brick:Speed_Status",
+            "parent_to_child_relation": "brick:hasPoint",
+            "child_to_parent_relation": "brick:isPointOf"
+        }
+    ]
+}

@@ -1,0 +1,356 @@
+
+        <context>
+        <input>
+        # JSON EXAMPLE FILE
+        The JSON Example file is a sample data file that contains all unique entity types of the JSON response of a GET request to the API of an IoT platform.
+        It represents the data structure of the literal entities of a building and its systematic components, available sensors and actuators, but with only one instance of each entity type.
+        content: <data>
+[
+    {
+        "id": "Hotel:hotel",
+        "type": "Hotel",
+        "name": {
+            "type": "Text",
+            "value": "hotel",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "AmbientTemperatureSensor",
+        "type": "AmbientTemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "Hotel:hotel",
+            "metadata": {}
+        },
+        "temperatureAmb": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "HotelRoom:fiware_room_base_1_v1",
+        "type": "HotelRoom",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "Hotel:hotel",
+            "metadata": {}
+        },
+        "name": {
+            "type": "Text",
+            "value": "fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "TemperatureSensor:fiware_room_base_1_v1",
+        "type": "TemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "temperature": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "CO2Sensor:fiware_room_base_1_v1",
+        "type": "CO2Sensor",
+        "co2": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "PresenceSensor:fiware_room_base_1_v1",
+        "type": "PresenceSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "pir": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "FreshAirVentilation:fiware_room_base_1_v1",
+        "type": "FreshAirVentilation",
+        "airFlowSetpoint": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "RadiatorThermostat:fiware_room_base_1_v1",
+        "type": "RadiatorThermostat",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "temperatureSetpoint": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "CoolingCoil:fiware_room_base_1_v1",
+        "type": "CoolingCoil",
+        "fanSpeed": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    }
+]</data>
+        </input>
+        # HELPFUL DEFINITIONS
+        ### AVAILABLE ONTOLOGY PROPERTIES (Use these for Inverse Lookup) ###
+bacnet:description, bacnet:object-identifier, bacnet:object-name, bacnet:object-type, bacnet:objectOf, brick:Relationship, brick:aggregationFunction, brick:aggregationInterval, brick:ambientTemperatureOfMeasurement, brick:connectedTo, brick:deprecatedInVersion, brick:deprecationMitigationMessage, brick:deprecationMitigationRule, brick:feeds, brick:hasAmbientTemperature, brick:hasAssociatedTag, brick:hasInputSubstance, brick:hasLocation, brick:hasOutputSubstance, brick:hasPart, brick:hasPoint, brick:hasQUDTReference, brick:hasSubMeter, brick:hasTag, brick:hasUnit, brick:isAssociatedWith, brick:isFedBy, brick:isLocationOf, brick:isMeteredBy, brick:isPartOf, brick:isPointOf, brick:isReplacedBy, brick:isSubMeterOf, brick:isTagOf, brick:latitude, brick:longitude, brick:meters, brick:timestamp, brick:value, rec:IPAddress, rec:MACAddress, rec:acknowledgedBy, rec:acknowledgedTime, rec:address, rec:addressLine1, rec:addressLine2, rec:adjacentElement, rec:architectedBy, rec:area, rec:assetTag, rec:batteryPercentage, rec:capacity, rec:city, rec:closedBy, rec:closedTime, rec:commissionedBy, rec:commissioningDate, rec:constructedBy, rec:containsElement, rec:coordinateSystem, rec:coordinates, rec:country, rec:createdBy, rec:createdTime, rec:currentLevel, rec:documentTopic, rec:documentation, rec:end, rec:endLevel, rec:familyName, rec:gender, rec:generation, rec:georeference, rec:givenName, rec:grossArea, rec:hasMember, rec:hasPart, rec:hasPoint, rec:heightRUs, rec:heightScaleFactor, rec:image, rec:includes, rec:initialCost, rec:installationDate, rec:installedBy, rec:intersectingElement, rec:isFedBy, rec:isLocationOf, rec:isMemberOf, rec:isPartOf, rec:leaseOf, rec:leasee, rec:leasor, rec:levelNumber, rec:locatedIn, rec:logo, rec:maintenanceInterval, rec:manufacturedBy, rec:maxOccupancy, rec:modelNumber, rec:mountedOn, rec:netArea, rec:numberOfPorts, rec:objectOfInterest, rec:operatedBy, rec:originX, rec:originY, rec:ownedBy, rec:owns, rec:poeType, rec:portSpeed, rec:postalCode, rec:producedBy, rec:region, rec:regulatedBy, rec:regulates, rec:relatedTo, rec:rentableArea, rec:seatingCapacity, rec:serialNumber, rec:servicedBy, rec:severity, rec:sourcePoint, rec:standard, rec:start, rec:startLevel, rec:status, rec:targetPoint, rec:timestamp, rec:tripDirection, rec:turnoverDate, rec:url, rec:value, rec:weight, rec:widthScaleFactor, rec:wifiSignalStrength, rec:xRotationalScaleFactor, rec:yRotationalScaleFactor, ref:BACnetURI, ref:bacnet-read-property, ref:hasExternalReference, ref:hasIfcProjectReference, ref:hasTimeseriesId, ref:hasTimeseriesReference, ref:ifcFileLocation, ref:ifcGlobalID, ref:ifcName, ref:ifcProjectID, ref:preferred, ref:storedAt, skos:broader, skos:narrower, vcard:hasAddress
+        # RESULTS OF PREPROCESSING OF THE JSON FILE:
+{'api_endpoint': 'https://fiware.eonerc.rwth-aachen.de/v2/entities/{entityId}/attrs/{attrName}/value', 'identifier_key': 'id', 'class_keys': ['type'], 'class_mappings': {'Hotel': 'brick:Building', 'AmbientTemperatureSensor': 'brick:Outside_Air_Temperature_Sensor', 'HotelRoom': 'brick:Room', 'TemperatureSensor': 'brick:Air_Temperature_Sensor', 'CO2Sensor': 'brick:CO2_Level_Sensor', 'PresenceSensor': 'brick:PIR_Sensor', 'FreshAirVentilation': 'brick:Ventilation_Air_System', 'RadiatorThermostat': 'brick:Radiator', 'CoolingCoil': 'brick:Cooling_Coil'}, 'numerical_properties': ['temperatureAmb', 'temperature', 'co2', 'pir', 'airFlowSetpoint', 'temperatureSetpoint', 'fanSpeed'], 'relational_properties': ['hasLocation'], 'relational_property_mappings': {'hasLocation': 'brick:hasLocation'}, 'extra_nodes': [{'non_numeric_parent_class': 'brick:Ventilation_Air_System', 'numeric_property': 'airFlowSetpoint', 'mapped_ontology_class': 'brick:Air_Flow_Setpoint', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}, {'non_numeric_parent_class': 'brick:Radiator', 'numeric_property': 'temperatureSetpoint', 'mapped_ontology_class': 'brick:Temperature_Setpoint', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}, {'non_numeric_parent_class': 'brick:Cooling_Coil', 'numeric_property': 'fanSpeed', 'mapped_ontology_class': 'brick:Speed_Status', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}]}
+        # RELATIONSHIP CONTEXT
+        The extra nodes and their specific parent/child relationships are defined in the RESULTS OF PREPROCESSING section above under "extra_nodes".
+
+                # PLATFORM CONFIGURATION FILE
+                The configuration file should contain the following information:
+                - The ID_KEY is the key in the JSON data that uniquely identifies each entity and is equal to the identifier_key in the context
+                - The TYPE_KEYS are the keys in the JSON data that identify the type of each entity and is equal to the class_keys in the context
+                - The JSONPATH_EXTRA_NODES are the JSONpath Expressions to the {EXTRA_NODES} that should be included in the mapping.
+
+                <constraints>
+                Ensure that your JSONPath explicitly filters for the parent entity object that contains the extra node.
+                - Example: '$.[?(@.type=="CoolingCoil")]' or '$.[?(@.fanSpeed)]'
+                - You MUST use filter expressions ('?', '@') so the iterator stays at the root entity level where the "id" key is located.
+                - DO NOT step into the numerical property itself (e.g., do NOT use '$[*].fanSpeed' or '$..fanSpeed').
+                </constraints>
+
+                Terms in brackets {} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+
+                Content: <data>{
+  "ID_KEY": "id",
+  "TYPE_KEYS": [
+    "type"
+  ],
+  "JSONPATH_EXTRA_NODES": [
+    "$[?(@.airFlowSetpoint)]",
+    "$[?(@.temperatureSetpoint)]",
+    "$[?(@.fanSpeed)]"
+  ]
+}</data>
+
+
+        # RESOURCE NODE RELATIONSHIP DOCUMENT
+        The RML Mapping file can be generated automatically based on a validated Resource Node Relationship Document.
+        The Resource Node Relationship Document is a prefilled document that contains the necessary information to generate the RML Mapping file.
+
+        content: <data>
+{
+  "@context": {
+    "bacnet": "http://data.ashrae.org/bacnet/2020#",
+    "brick": "https://brickschema.org/schema/Brick#",
+    "bsh": "https://brickschema.org/schema/BrickShape#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "owl": "http://www.w3.org/2002/07/owl#",
+    "qudt": "http://qudt.org/schema/qudt/",
+    "qudtqk": "http://qudt.org/vocab/quantitykind/",
+    "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+    "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+    "rec": "https://w3id.org/rec#",
+    "ref": "https://brickschema.org/schema/Brick/ref#",
+    "s223": "http://data.ashrae.org/standard223#",
+    "sdo": "http://schema.org/",
+    "sh": "http://www.w3.org/ns/shacl#",
+    "skos": "http://www.w3.org/2004/02/skos/core#",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "tag": "https://brickschema.org/schema/BrickTag#",
+    "unit": "http://qudt.org/vocab/unit/",
+    "vcard": "http://www.w3.org/2006/vcard/ns#",
+    "xsd": "http://www.w3.org/2001/XMLSchema#"
+  },
+  "@data": [
+    {
+      "nodetype": "AmbientTemperatureSensor",
+      "iterator": "$[?(@.type=='AmbientTemperatureSensor')]",
+      "class": "**TODO: PLEASE CHECK** brick:Air_Temperature_Sensor brick:Temperature_Sensor brick:Water_Temperature_Sensor",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "Hotel",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:hasLocation brick:isPointOf brick:isReplacedBy brick:hasLocation",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "CO2Sensor",
+      "iterator": "$[?(@.type=='CO2Sensor')]",
+      "class": "**TODO: PLEASE CHECK** brick:CO2_Sensor",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "HotelRoom",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:isPointOf brick:hasLocation brick:isReplacedBy brick:hasLocation",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "CoolingCoil",
+      "iterator": "$[?(@.type=='CoolingCoil')]",
+      "class": "**TODO: PLEASE CHECK** brick:Cooling_Coil",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "HotelRoom",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:feeds brick:hasLocation brick:isReplacedBy rec:locatedIn brick:value brick:hasLocation",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "FreshAirVentilation",
+      "iterator": "$[?(@.type=='FreshAirVentilation')]",
+      "class": "**TODO: PLEASE CHECK** brick:Fresh_Air_Fan brick:Fresh_Air_Setpoint_Limit brick:Max_Fresh_Air_Setpoint_Limit",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "HotelRoom",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:hasLocation",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "Hotel",
+      "iterator": "$[?(@.type=='Hotel')]",
+      "class": "**TODO: PLEASE CHECK** brick:Hot_Deck brick:Shower brick:Tunnel",
+      "hasRelationship": [],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "HotelRoom",
+      "iterator": "$[?(@.type=='HotelRoom')]",
+      "class": "**TODO: PLEASE CHECK** brick:Control_Room brick:Team_Room brick:Telecom_Room",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "Hotel",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:hasLocation",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "PresenceSensor",
+      "iterator": "$[?(@.type=='PresenceSensor')]",
+      "class": "**TODO: PLEASE CHECK** brick:Pressure_Sensor brick:Frequency_Sensor brick:Speed_Sensor",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "HotelRoom",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:hasLocation brick:isPointOf brick:hasLocation brick:isReplacedBy",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "RadiatorThermostat",
+      "iterator": "$[?(@.type=='RadiatorThermostat')]",
+      "class": "**TODO: PLEASE CHECK** brick:Thermostat",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "HotelRoom",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:hasLocation brick:feeds brick:hasLocation brick:isReplacedBy rec:locatedIn brick:value",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    },
+    {
+      "nodetype": "TemperatureSensor",
+      "iterator": "$[?(@.type=='TemperatureSensor')]",
+      "class": "**TODO: PLEASE CHECK** brick:Temperature_Sensor",
+      "hasRelationship": [
+        {
+          "relatedNodeType": "HotelRoom",
+          "propertyClass": "**TODO: PLEASE CHECK** brick:isPointOf brick:hasLocation brick:isReplacedBy brick:hasLocation",
+          "rawdataidentifier": "hasLocation.value"
+        }
+      ],
+      "hasDataAccess": null
+    }
+  ]
+}</data>
+
+        </context>
+
+        <instructions>
+
+        ### CRITICAL: ONTOLOGY DIRECTIONALITY RULES
+        You must strictly respect the 'Domain' and 'Range' of the ontology properties.
+        When defining a relationship: "CurrentNode (Subject) -> Property -> RelatedNode (Object)":
+
+        1. **Check Direction:** Ensure the chosen property is defined in the ontology to flow FROM the Subject's class TO the Object's class.
+        2. **Avoid Inversion:** - If a property `P` is defined as `A -> P -> B`, do NOT use it for `B -> A`.
+           - Instead, search for the **inverse property** (e.g., use `hasPart` instead of `isPartOf`, or `contains` instead of `containedIn`).
+        3. **Logic Check:** - Incorrect: `House (Subject) -> isLocationOf -> Room (Object)` (Implies the House is inside the Room).
+           - Correct: `House (Subject) -> hasLocation -> Room (Object)` OR `House (Subject) -> contains -> Room (Object)`.
+
+        **Verification Step:** Before outputting a property, ask yourself: "Does the ontology define [Current Class] as the DOMAIN of this property?"
+
+
+        ### CRITICAL: DO NOT DELETE EXTRA NODES
+        The "node_relationship.json" input contains "Extra Nodes" (derived from numerical properties).
+        You MUST preserve these nodes in your output.
+        If the preprocessor generated a node (e.g., for 'fanSpeed', 'setpoint', or 'sensor'), KEEP IT in the list.
+
+        ### HANDLING EXTRA NODE RELATIONSHIPS
+        In the "Resource Node Relationship Document", you are defining the properties of the **Parent Node**.
+
+        **CRITICAL INSTRUCTION:**
+        1. You must define the relationship from the perspective of the Parent (Parent -> Child).
+        2. Look up the specific extra node in the context provided above.
+        3. Use the exact "parent_to_child_relation" value defined for that specific extra node. Do not use the "child_to_parent_relation".
+        Fill out the preprocessed Resource Node Relationship Document based on the results of Preprocessing of the JSON file.
+
+        Preserve the structure and strictly do not change ANYTHING in the Resource Node Relationship Document except:
+        - For the value of every "class" key:
+            - Ignore any prefilled value and replace it with the mapped {ONTOLOGY_CLASS} for the "nodetype" value of the entity.
+        - For the value of every "property" key:
+            - Ignore any prefilled value and replace it with the mapped {ONTOLOGY_PROPERTY} for the "rawdataidentifier" value of the entity.
+        - For the value of every "rawdataidentifier" key:
+            - If this is a relationship to an **Extra Node**: Set it to "id".
+            - Otherwise: Keep the existing value.
+        - For the value of every "hasdataaccess" key:
+            - If entity has a numerical property: Ignore any prefilled value, replace it with the template {API_ENDPOINT_URL} and adapt its variables to match the attribute of this entity and '{id}' instead of the ID_KEY for the API call.
+            - If an entity has an associated extra node, fill out the API_ENDPOINT_URL just for the extra node, not for the original entity.
+        Terms in brackets {} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+        </instructions>
+
+        <output> Return the Resource Node Relationship Document in JSON format.</output>

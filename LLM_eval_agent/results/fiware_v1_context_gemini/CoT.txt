@@ -1,0 +1,29 @@
+Mapping IoT Entities
+
+I've begun identifying key elements within the JSON, focusing on raw data endpoints and class distinctions.
+
+Defining Semantic Keys
+
+I've mapped numerical and relational properties, correlating them with ontology equivalents and extra nodes.
+
+Analyzing Equipment Entities
+
+I've categorized entities, confirming extra nodes needed for FreshAirVentilation, and RadiatorThermostat, with relationships.
+
+I'm now determining which mapped class should be used for CoolingCoil using its fanSpeed value.
+
+Refining Equipment Properties
+
+I've validated property mappings, specifically noting sensor types, like presence and CO2, per the provided ontology.
+
+Clarifying Ontology Integration
+
+I've refined class mappings using available Brick classes and defined the API endpoint and path for data retrieval.
+
+Confirming Properties and Nodes
+
+I've finalized numerical properties, addressed self-corrections on sensors, and validated extra node requirements.
+
+Finalizing Entity Mappings
+
+I've confirmed fanSpeed for CoolingCoil should be brick:Speed_Status, matching data context.

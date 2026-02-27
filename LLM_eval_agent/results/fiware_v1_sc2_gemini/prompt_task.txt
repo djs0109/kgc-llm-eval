@@ -1,0 +1,243 @@
+<context>
+        <input>
+        # JSON EXAMPLE FILE
+        The JSON Example file is a sample data file that contains all unique entity types of the JSON response of a GET request to the API of an IoT platform.
+        It represents the data structure of the literal entities of a building and its systematic components, available sensors and actuators, but with only one instance of each entity type.
+        content: <data>
+[
+    {
+        "id": "Hotel:hotel",
+        "type": "Hotel",
+        "name": {
+            "type": "Text",
+            "value": "hotel",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "AmbientTemperatureSensor",
+        "type": "AmbientTemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "Hotel:hotel",
+            "metadata": {}
+        },
+        "temperatureAmb": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "HotelRoom:fiware_room_base_1_v1",
+        "type": "HotelRoom",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "Hotel:hotel",
+            "metadata": {}
+        },
+        "name": {
+            "type": "Text",
+            "value": "fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "TemperatureSensor:fiware_room_base_1_v1",
+        "type": "TemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "temperature": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "CO2Sensor:fiware_room_base_1_v1",
+        "type": "CO2Sensor",
+        "co2": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "PresenceSensor:fiware_room_base_1_v1",
+        "type": "PresenceSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "pir": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "FreshAirVentilation:fiware_room_base_1_v1",
+        "type": "FreshAirVentilation",
+        "airFlowSetpoint": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "RadiatorThermostat:fiware_room_base_1_v1",
+        "type": "RadiatorThermostat",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        },
+        "temperatureSetpoint": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        }
+    },
+    {
+        "id": "CoolingCoil:fiware_room_base_1_v1",
+        "type": "CoolingCoil",
+        "fanSpeed": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    }
+]</data>
+        </input>
+        # RESULTS OF PREPROCESSING OF THE JSON FILE:
+{'api_endpoint': 'https://fiware.eonerc.rwth-aachen.de/v2/entities/{entityId}/attrs/{attrName}/value', 'identifier_key': 'id', 'class_keys': ['type'], 'class_mappings': {'Hotel': 'brick:Building', 'AmbientTemperatureSensor': 'brick:Outside_Air_Temperature_Sensor', 'HotelRoom': 'brick:Room', 'TemperatureSensor': 'brick:Air_Temperature_Sensor', 'CO2Sensor': 'brick:CO2_Level_Sensor', 'PresenceSensor': 'brick:PIR_Sensor', 'FreshAirVentilation': 'brick:Ventilation_Air_System', 'RadiatorThermostat': 'brick:Radiator', 'CoolingCoil': 'brick:Cooling_Coil'}, 'numerical_properties': ['temperatureAmb', 'temperature', 'co2', 'pir', 'airFlowSetpoint', 'temperatureSetpoint', 'fanSpeed'], 'relational_properties': ['hasLocation'], 'relational_property_mappings': {'hasLocation': 'brick:hasLocation'}, 'extra_nodes': [{'non_numeric_parent_class': 'brick:Ventilation_Air_System', 'numeric_property': 'airFlowSetpoint', 'mapped_ontology_class': 'brick:Air_Flow_Setpoint', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}, {'non_numeric_parent_class': 'brick:Radiator', 'numeric_property': 'temperatureSetpoint', 'mapped_ontology_class': 'brick:Temperature_Setpoint', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}, {'non_numeric_parent_class': 'brick:Cooling_Coil', 'numeric_property': 'fanSpeed', 'mapped_ontology_class': 'brick:Speed_Status', 'parent_to_child_relation': 'brick:hasPoint', 'child_to_parent_relation': 'brick:isPointOf'}]}
+
+        # RML MAPPING FILE
+        The RML mapping file is used to generate the RDF knowledge graph from the JSON Entities data.
+
+        The knowledge graph looks like this:
+        ## KNOWLEDGE GRAPH FILE
+        The knowledge graph (KG) is a structured representation of the building's systematic components, including rooms, ventilation devices, sensors, and their relationships.
+        It is built from the provided JSON entities file of a GET request to a specific IoT platform.
+
+        <constraints>MOST IMPORTANT: RDF should follow a valid turtle syntax!</constraints>
+        <data>Available prefixes:
+Ontology prefixes:
+@prefix bacnet: <http://data.ashrae.org/bacnet/2020#> .
+@prefix brick: <https://brickschema.org/schema/Brick#> .
+@prefix bsh: <https://brickschema.org/schema/BrickShape#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix qudt: <http://qudt.org/schema/qudt/> .
+@prefix qudtqk: <http://qudt.org/vocab/quantitykind/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rec: <https://w3id.org/rec#> .
+@prefix ref: <https://brickschema.org/schema/Brick/ref#> .
+@prefix s223: <http://data.ashrae.org/standard223#> .
+@prefix sdo: <http://schema.org/> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix tag: <https://brickschema.org/schema/BrickTag#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+</data>
+
+        ## Knowledge Graph Generation Instructions
+        <instructions>
+        The knowledge graph must begin with:
+        - A declaration of all {ONTOLOGY_PREFIXES} used in the file
+        - The standard RDF prefix: @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+        - Do not add prefixes for the API endpoint, but use the full URI in angle brackets.
+        - Do not use any prefixes for the 'http://example.com/' URI, but use the full URI in angle brackets.
+
+        Every IoT entity and each Extra Node must be declared with:
+        - A unique URI following the pattern <http://example.com/{ENTITY_TYPE}/{ID}>. Preserve and use the complete id from the JSON in the KG.
+        - A type classification using a {ONTOLOGY_CLASS} selected from the given context
+
+        For an entity having relationships or connections to other entities,
+        one or more properties using {ONTOLOGY_PROPERTY} and the URI of the entity must be added
+        - System hierarchies must be properly represented
+        - The datamodel must be represented correctly
+        - Devices must be properly connected to their locations
+
+        For an entity or extra node having a numerical property,
+        the property 'rdf:value <{API_ENDPOINT_URL}>' must be added. in the {API_ENDPOINT_URL} template, adapt its variables to match the attribute of this entity and use the identifier for the API call.
+
+        Extra Nodes establish a connection between an entity and a numerical value when the entity's ontology class does not include a numerical property.
+        These new entities should derive their names from the properties that necessitated their creation.
+        In the JSON file, the numerical values of the entities that map to non_numeric ontology classes must be connected to their corresponding extra nodes.
+        If an entity has an associated extra node, link numerical values just to the extra node, not to the original entity.
+
+        Terms in brackets {} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+        </instructions>
+
+        <constraints>MOST IMPORTANT: RML should follow a valid turtle syntax!</constraints>
+
+        ## RML Mapping Instructions
+        <instructions>
+        The RML mapping must include the ontology prefixes from the knowledge graph and
+        the RML-specific prefix: @prefix ex: <http://example.com#> .
+
+        Every IoT entity type and each extra node type must have a corresponding TriplesMap declared with
+        a unique mapping URI following the pattern ex:Mapping{ENTITY_TYPE} and a type classification: a rr:TriplesMap.
+
+        Each TriplesMap must define its data source via rml:logicalSource with
+        the rml:referenceFormulation ql:JSONPath, rml:source "placeholder.json" and an iterator to filter entities by type.
+        ### Iterator Constraints <constraints>
+        Put iterator in single quotes.
+        Avoid using spaces in the iterator string!
+        Ensure that your iterator explicitly filters for the exact entity type mapping to the TriplesMap.
+        - Example: '$.[?(@.type=="Hotel")]'
+        - You MUST use filter expressions ('?', '@') to prevent the mapping from applying to the wrong JSON objects.
+        </constraints>
+        Each TriplesMap must define a rr:subjectMap with
+        rr:template "http://example.com/{ENTITY_TYPE}/<built-in function id>" for dynamic URI generation from data and rr:class {ONTOLOGY_CLASS} for type classification
+
+        For entities that provide or expose numerical data via API endpoint,
+        a rr:predicateObjectMap must be added with rdf:value and an objectMap for API endpoint URL with rr:template "{API_ENDPOINT_URL}"
+
+        For entities that reference other entities in the data source,
+        a rr:predicateObjectMap must be added with:
+        - {ONTOLOGY_PROPERTY} as predicate
+        - an objectMap referencing rr:parentTriplesMap ex:Mapping{ENTITY_TYPE}
+        - Join conditions must match the data source field names and structure
+        - System hierarchies, the datamodel relationships and devices and their locations must be properly represented through join conditions and their child and parent
+
+        In the JSON file, the added extra nodes are connected to the parent entities through a 'relatedTo' relation, with the parent entity's 'id' as value.
+        The according ontology property is the specific "child_to_parent_relation" defined for that exact extra node in the context.
+        Uppercase terms in brackets {} are placeholders for values given in the context. Strictly choose the values from the preprocessing of the JSON file, except for the variables inside API_ENDPOINT_URL, which can be adapted to match the use case.
+        For the '{id}', use the value of the identifier_key from the context.
+        </instructions>
+
+
+
+        </context>
+
+        <instructions>
+        Generate the RML mapping file from the provided JSON Example file needed for generating the knowledge graph based on the RML instructions.
+        Do not use any other information to fill out the RML mapping file.
+        </instructions>
+
+        <output> Return the RML Mapping file in Turtle format. </output>

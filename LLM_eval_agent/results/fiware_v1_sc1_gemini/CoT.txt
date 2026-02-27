@@ -1,0 +1,16 @@
+Mapping IoT Entities
+
+I have successfully preprocessed the JSON data, identifying class/property mappings and the URI structure.
+
+Refining URI Generation
+
+I've crafted a comprehensive mapping with specific property handling and extra node generation.
+Python
+
+Defining Sensor Relationships
+
+\n\nI have now fully mapped sensor types, their URIs, and relationships to relevant brick classes, including numeric properties.
+
+Expanding Relationship Models
+
+\n\nI have integrated extra nodes, successfully mapping their types, URIs, and property relations into the schema.

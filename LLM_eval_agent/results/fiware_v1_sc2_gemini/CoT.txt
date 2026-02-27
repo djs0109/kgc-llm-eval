@@ -1,0 +1,15 @@
+Mapping RML Generation
+
+I've crafted an initial RML file in Turtle format, referencing a JSON IoT example and its preprocessing results.
+
+Defining API Mapping
+
+I've specified the rdf:value API endpoint and the required prefixes to craft the corresponding RML triples maps for the model.
+
+Refining Extra Node Logic
+
+I've clarified Extra Node mapping by linking numerical values only to extra nodes using a brick:hasPoint relationship.
+
+Constructing Triple Maps
+
+I've established templates and iterators, crafting distinct TripleMaps for extra nodes and parent entities.
