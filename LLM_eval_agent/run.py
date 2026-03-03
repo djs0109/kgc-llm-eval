@@ -80,6 +80,50 @@ def get_file(folder, file_type, keyword=None):
                 print("Invalid input. Please enter a number.")
 
 
+def get_files_recursive(folder, file_type, keyword=None):
+    """
+    Recursively get all files in the folder and subfolders that match the file_type.
+    Args:
+        folder: The root folder to search in
+        file_type: Shorthand for file type
+        keyword: Optional keyword for filtering
+    Returns:
+        List of file paths matching the criteria
+    """
+    file_types = {
+        "ONT": {"text": f"{keyword}", "ending": ".ttl", "description": "Ontology"},
+        "JEN": {"text": "room", "ending": ".json", "description": "JSON Entities"},
+        "JEX": {"text": "example", "ending": ".json", "description": "JSON Example"},
+        "PC": {"text": "config", "ending": ".json", "description": "Platform Configuration"},
+        "RNR": {"text": "node_relationship", "ending": ".json", "description": "Resource Node Relationships"},
+        "RNRv": {"text": "node_relationship_validated", "ending": ".json", "description": "Resource Node Relationships validated"},
+        "RML": {"text": "rml", "ending": ".ttl", "description": "RML Mapping"},
+        "KG": {"text": "entities", "ending": ".ttl", "description": "Knowledge Graph"},
+        "iKG": {"text": "inferred", "ending": ".ttl", "description": "Inferred Knowledge Graph"},
+        "CC": {"text": "controller", "ending": ".yml", "description": "Controller Configuration"},
+        "CTX": {"text": "context", "ending": ".json", "description": "Context"},
+    }
+    if file_type not in file_types:
+        raise ValueError(f"Unknown file type: {file_type}. Available types: {list(file_types.keys())}")
+    if not folder or not os.path.isdir(folder):
+        print(f"Invalid folder: {folder}. Please provide a valid directory path.")
+        return []
+    file = file_types[file_type]
+    text = file["text"]
+    ending = file["ending"]
+    description = file["description"]
+    matching_files = []
+    for root, dirs, files in os.walk(folder):
+        for filename in files:
+            if text.lower() in str(filename).lower() and str(filename).endswith(ending):
+                matching_files.append(os.path.join(root, filename))
+    if len(matching_files) == 0:
+        print(f"No {description} files found recursively in {folder}")
+    else:
+        print(f"Found {len(matching_files)} {description} files recursively:")
+    return matching_files
+
+
 # Usage ======================================================
 
 # CHOOSE DATASET ======================================================
@@ -287,7 +331,7 @@ class ScenarioExecutor:
         )
         raw_response = ""
 
-        if getattr(self, 'offline_mode', True):
+        if self.offline_mode:
             # --- OFFLINE MODE
             self.calculate_mapping_reference(classifier="inference")
             pyperclip.copy(prompts.context)
@@ -352,7 +396,16 @@ class ScenarioExecutor:
 
         if not hasattr(self, 'context') or not self.context:
             print("\nLoad context from file...")
-            self.load_context(self.result_folder)
+            context_files = get_files_recursive(folder=self.target_folder, file_type="CTX")
+            # print all found context files
+            print("\nChoose a existing context to run the scenarios on:")
+            for idx, folder in enumerate(context_files, 0):
+                print(f"{idx}: {folder}")
+            # user can select the found context for this dataset
+            selected_idx = int(input("Select a context file by number: "))
+            context_file = context_files[selected_idx]
+            self.load_context(self.result_folder, context_file=context_file)
+        # if context not loaded use the validated context from the 'golden' folder
         if not hasattr(self, 'context') or not self.context:
             print("Load Validated Context...")
             # Choose the parent of the result folder and then the 'golden' folder inside it
@@ -360,9 +413,10 @@ class ScenarioExecutor:
             golden_folder = os.path.join(parent_folder, "golden")
             if os.path.exists(golden_folder):
                 self.load_context(golden_folder) # get validated context
+        # if context still not loaded, ask user to run get_context() first
         if not hasattr(self, 'context') or not self.context:
             input("No context found. Please run get_context() first. Press Enter to continue...")
-            print("Get context from Claude...")
+            print("Get context from LLM agent...")
             self.get_context()
 
         print(f"\nContext loaded: {json.dumps(self.context, indent=2)}")
@@ -425,7 +479,7 @@ class ScenarioExecutor:
                     # ==========================================
                     # MODE SELECTION (Online vs Offline)
                     # ==========================================
-                    if getattr(self, 'offline_mode', True):
+                    if self.offline_mode:
                         # --- OFFLINE MODE ---
                         if pyperclip:
                             pyperclip.copy(current_prompt)
@@ -552,12 +606,15 @@ class ScenarioExecutor:
             time.sleep(5)
         print(f"\n\nAll selected scenarios completed. Results saved in {self.result_folder}")
 
-    def load_context(self, result_folder):
-        context_file = get_file(result_folder, "CTX")
+    def load_context(self, result_folder=None, context_file=None):
+        if context_file is None:
+            context_file = get_file(result_folder, "CTX")
+
         if context_file:
             with open(context_file, 'r', encoding='utf-8') as f:
                 self.context = json.load(f)
                 prompts.load_context(self.context)
+                print(f"Context loaded from {context_file}")
             return self.context
         else:
             return None
@@ -809,4 +866,3 @@ if __name__ == "__main__":
         }
         executor.save_metrics(status=error_info)
         print(e)
-
