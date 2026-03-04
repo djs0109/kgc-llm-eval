@@ -1,29 +1,43 @@
-Mapping IoT Entities
+Pinpointing Specific Endpoint
 
-I've begun identifying key elements within the JSON, focusing on raw data endpoints and class distinctions.
+I've located what looks like the best, most specific endpoint for retrieving raw attribute values.
 
-Defining Semantic Keys
+Defining Key Ontological Relations
 
-I've mapped numerical and relational properties, correlating them with ontology equivalents and extra nodes.
+I've successfully identified and mapped semantic keys to Brick/REC ontology, e.g., type to class mappings.
 
-Analyzing Equipment Entities
+Clarifying Node Relationships
 
-I've categorized entities, confirming extra nodes needed for FreshAirVentilation, and RadiatorThermostat, with relationships.
+I've clarified the need for extra Point nodes for specific equipment based on Brick's structure, focusing on FreshAirVentilation.
 
-I'm now determining which mapped class should be used for CoolingCoil using its fanSpeed value.
+Refining Node Structure
 
-Refining Equipment Properties
+I have formalized the extra node requirements for setpoints and status, also confirming ontology node usage.
 
-I've validated property mappings, specifically noting sensor types, like presence and CO2, per the provided ontology.
+Revisiting Node Requirements
 
-Clarifying Ontology Integration
+I've re-evaluated sensor handling; they appear self-contained, while equipment necessitates extra nodes as originally outlined.
 
-I've refined class mappings using available Brick classes and defined the API endpoint and path for data retrieval.
+Clarifying Attribute Handling
 
-Confirming Properties and Nodes
+I've determined that sensors function as entities with attributes, removing the original need for extra sensor nodes.
 
-I've finalized numerical properties, addressed self-corrections on sensors, and validated extra node requirements.
+Defining Point-Equipment Distinction
 
-Finalizing Entity Mappings
+I've clarified distinction between direct points and equipment requiring extra nodes for attribute representation.
 
-I've confirmed fanSpeed for CoolingCoil should be brick:Speed_Status, matching data context.
+Refining Semantic Mappings
+
+I've finalized mappings, e.g., for radiator thermostats and ambient temperature sensors, to their corresponding Brick ontology classes.
+
+Revising Node Requirements
+
+I've streamlined node requirements, adding a brick:Status for cooling coil fan speeds in the model.
+
+Finalizing Semantic Mappings
+
+I've clarified and confirmed mappings, particularly addressing RadiatorThermostats and JSON keys like "pir".
+
+Confirming New Ontology Nodes
+
+I've precisely linked new properties like fanSpeed to Brick ontology classes, solidifying node structure refinements.

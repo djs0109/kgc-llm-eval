@@ -30,22 +30,8 @@
         }
     },
     {
-        "id": "AirHandlingUnitFiware:fiware",
-        "type": "AirHandlingUnit",
-        "hasLocation": {
-            "type": "Relationship",
-            "value": "Hotel:hotel",
-            "metadata": {}
-        }
-    },
-    {
-        "id": "HotelRoom:fiware_room_base_1_v2",
+        "id": "HotelRoom:fiware_room_base_1_v1",
         "type": "HotelRoom",
-        "co2": {
-            "type": "Number",
-            "value": 0.0,
-            "metadata": {}
-        },
         "hasLocation": {
             "type": "Relationship",
             "value": "Hotel:hotel",
@@ -53,7 +39,16 @@
         },
         "name": {
             "type": "Text",
-            "value": "fiware_room_base_1_v2",
+            "value": "fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "TemperatureSensor:fiware_room_base_1_v1",
+        "type": "TemperatureSensor",
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
             "metadata": {}
         },
         "temperature": {
@@ -63,11 +58,25 @@
         }
     },
     {
-        "id": "PresenceSensor:fiware_room_base_1_v2",
+        "id": "CO2Sensor:fiware_room_base_1_v1",
+        "type": "CO2Sensor",
+        "co2": {
+            "type": "Number",
+            "value": 0.0,
+            "metadata": {}
+        },
+        "hasLocation": {
+            "type": "Relationship",
+            "value": "HotelRoom:fiware_room_base_1_v1",
+            "metadata": {}
+        }
+    },
+    {
+        "id": "PresenceSensor:fiware_room_base_1_v1",
         "type": "PresenceSensor",
         "hasLocation": {
             "type": "Relationship",
-            "value": "HotelRoom:fiware_room_base_1_v2",
+            "value": "HotelRoom:fiware_room_base_1_v1",
             "metadata": {}
         },
         "pir": {
@@ -77,8 +86,8 @@
         }
     },
     {
-        "id": "VariableAirVolumeBox:fiware_room_base_1_v2",
-        "type": "VariableAirVolumeBox",
+        "id": "FreshAirVentilation:fiware_room_base_1_v1",
+        "type": "FreshAirVentilation",
         "airFlowSetpoint": {
             "type": "Number",
             "value": 0.0,
@@ -86,21 +95,16 @@
         },
         "hasLocation": {
             "type": "Relationship",
-            "value": "HotelRoom:fiware_room_base_1_v2",
-            "metadata": {}
-        },
-        "isFedBy": {
-            "type": "Relationship",
-            "value": "AirHandlingUnitFiware:fiware",
+            "value": "HotelRoom:fiware_room_base_1_v1",
             "metadata": {}
         }
     },
     {
-        "id": "RadiatorThermostat:fiware_room_base_1_v2",
+        "id": "RadiatorThermostat:fiware_room_base_1_v1",
         "type": "RadiatorThermostat",
         "hasLocation": {
             "type": "Relationship",
-            "value": "HotelRoom:fiware_room_base_1_v2",
+            "value": "HotelRoom:fiware_room_base_1_v1",
             "metadata": {}
         },
         "temperatureSetpoint": {
@@ -110,25 +114,16 @@
         }
     },
     {
-        "id": "CoolingCoil:fiware_room_base_1_v2",
+        "id": "CoolingCoil:fiware_room_base_1_v1",
         "type": "CoolingCoil",
-        "hasLocation": {
-            "type": "Relationship",
-            "value": "HotelRoom:fiware_room_base_1_v2",
-            "metadata": {}
-        }
-    },
-    {
-        "id": "Fan:CoolingCoil:fiware_room_base_1_v2",
-        "type": "Fan",
         "fanSpeed": {
             "type": "Number",
             "value": 0.0,
             "metadata": {}
         },
-        "isPartOf": {
+        "hasLocation": {
             "type": "Relationship",
-            "value": "CoolingCoil:fiware_room_base_1_v2",
+            "value": "HotelRoom:fiware_room_base_1_v1",
             "metadata": {}
         }
     }
@@ -139,27 +134,19 @@ Classes and their inheritance relationship:
 - brick:Class
   - brick:Collection
     - brick:System
-      - brick:Heating_Ventilation_Air_Conditioning_System
+      - brick:Heating_Ventilation_Air_Conditioning_System: The equipment, distribution systems and terminals that provide, either collectively or individually, the processes of heating, ventilating or air conditioning to a building or portion of a building
         - brick:Air_System: The equipment, distribution systems and terminals that introduce or exhaust, either collectively or individually, the air into and from the building
           - brick:Ventilation_Air_System: The equipment, devices, and conduits that handle the introduction and distribution of ventilation air in the building
   - brick:Equipment
     - brick:HVAC_Equipment
-      - brick:Air_Handling_Unit
-        - brick:Dual_Duct_Air_Handling_Unit: An air handling unit that contains hot and cold decks to supply heating and cooling to a building
-        - brick:Pre-Cooling_Air_Unit: A type of AHU, use to pre-treat the outdoor air before feed to AHU
-        - brick:Dedicated_Outdoor_Air_System_Unit: A device that conditions and delivers 100% outdoor air to its assigned spaces. It decouples air-conditioning of the outdoor air, usually used to provide minimum outdoor air ventilation, from conditioning of the internal loads.
-      - brick:Air_Handler_Unit: Assembly consisting of sections containing a fan or fans and other necessary equipment to perform one or more of the following functions: circulating, filtration, heating, cooling, heat recovery, humidifying, dehumidifying, and mixing of air. Is usually connected to an air-distribution system.
-      - brick:Cold_Deck: Part of a dual duct air handling unit that supplies cooling to a building
-      - brick:Hot_Deck: Part of a dual duct air handling unit that supplies heating to a building
       - brick:Cooling_Valve: A valve that controls air temperature by modulating the amount of cold water flowing through a cooling coil
-      - brick:Thermostat: An automatic control device used to maintain temperature at a fixed or adjustable setpoint.; Thermostat.
-      - brick:Fan: Any device with two or more blades or vanes attached to a rotating shaft used to produce an airflow for the purpose of comfort, ventilation, exhaust, heating, cooling, or any other gaseous transport.
+      - brick:Air_Plenum: A component of the HVAC the receives air from the air handling unit or room to distribute or exhaust to or from the building
+        - brick:Return_Air_Plenum: A component of the HVAC the receives air from the room to recirculate or exhaust to or from the building
+      - brick:Air_Handling_Unit
+        - brick:Pre-Cooling_Air_Unit: A type of AHU, use to pre-treat the outdoor air before feed to AHU
+      - brick:Cold_Deck: Part of a dual duct air handling unit that supplies cooling to a building
+      - brick:Fan
         - brick:Fresh_Air_Fan
-        - brick:Ceiling_Fan: A fan installed on the ceiling of a room for the purpose of air circulation
-        - brick:Cooling_Tower_Fan: A fan that pulls air through a cooling tower and across the louvers where the water falls to aid in heat exchange by the process of evaporation
-        - brick:Transfer_Fan: A fan that transfers air from a space to another space.
-      - brick:Air_Plenum
-        - brick:Supply_Air_Plenum: A component of the HVAC the receives air from the air handling unit to distribute to the building
       - brick:Heat_Exchanger
         - brick:Coil: Cooling or heating element made of pipe or tube that may or may not be finned and formed into helical or serpentine shape (ASHRAE Dictionary)
           - brick:Cooling_Coil: A cooling element made of pipe or tube that removes heat from equipment, machines or airflows. Typically filled with either refrigerant or cold water.
@@ -168,16 +155,11 @@ Classes and their inheritance relationship:
           - brick:Heating_Coil
             - brick:Direct_Expansion_Heating_Coil
       - brick:Terminal_Unit
-        - brick:Variable_Air_Volume_Box: A device that regulates the volume and temperature of air delivered to a zone by opening or closing a damper
-          - brick:Variable_Air_Volume_Box_With_Reheat: A VAV box with a reheat coil mounted on the discharge end of the unit that can heat the air delivered to a zone
-          - brick:RVAV: See Variable_Air_Volume_Box_With_Reheat
-        - brick:VAV: See Variable_Air_Volume_Box
-        - brick:Constant_Air_Volume_Box: A terminal unit for which supply air flow rate is constant and the supply air temperature is varied to meet thermal load
         - brick:Fan_Coil_Unit: Terminal device consisting of a heating and/or cooling heat exchanger or 'coil' and fan that is used to control the temperature in the space where it is installed
           - brick:Horizontal_Fan_Coil_Unit
           - brick:Wall_Fan_Coil_Unit: A wall-mounted fan coil unit used for individual room heating and cooling, often found in hotels, apartments, and offices
           - brick:Floor_Fan_Coil_Unit: A fan coil unit installed on the floor, typically against a wall, for providing heating and cooling in residential or small office spaces
-        - brick:FCU: See Fan_Coil_Unit
+        - brick:Air_Diffuser: A device that is a component of the air distribution system that controls the delivery of conditioned and/or ventilating air into a room
         - brick:Radiator
           - brick:Electric_Radiator: Electric heating device
           - brick:Hot_Water_Radiator: Radiator that uses hot water
@@ -187,6 +169,7 @@ Classes and their inheritance relationship:
         - brick:Occupancy_Sensor_Equipment
     - rec:ICTEquipment
       - rec:SensorEquipment
+        - rec:ThermostatEquipment: Thermostat.; An automatic control device used to maintain temperature at a fixed or adjustable setpoint.
         - rec:OccupancySensorEquipment: Occupancy sensor.; Detects occupancy of some space or area
         - rec:PeopleCountSensorEquipment: People count sensor.
   - brick:Location
@@ -195,23 +178,24 @@ Classes and their inheritance relationship:
         - brick:Lounge: A room for lesiure activities or relaxing
       - brick:Room
         - brick:Server_Room
-        - brick:Laboratory
-          - brick:Hot_Box: hot air chamber forming part of an air handler.
   - brick:Point
     - brick:Alarm
       - brick:Failure_Alarm
         - brick:Sensor_Failure_Alarm
-    - brick:Command
-      - brick:Fan_Command: Controls properties of fans
-        - brick:Fan_Speed_Command: Controls the speed of fans
-    - brick:Parameter
-      - brick:PID_Parameter
-        - brick:Gain_Parameter
-          - brick:Integral_Gain_Parameter
-            - brick:Supply_Air_Integral_Gain_Parameter
-          - brick:Proportional_Gain_Parameter
-            - brick:Supply_Air_Proportional_Gain_Parameter
     - brick:Sensor
+      - brick:Temperature_Sensor: Measures temperature: the physical property of matter that quantitatively expresses the common notions of hot and cold
+        - brick:Air_Temperature_Sensor: Measures the temperature of air
+          - brick:Outside_Air_Temperature_Sensor: Measures the temperature of outside air
+            - brick:Outside_Air_Temperature_Enable_Differential_Sensor
+              - brick:Low_Outside_Air_Temperature_Enable_Differential_Sensor
+        - brick:Water_Temperature_Sensor: Measures the temperature of water
+          - brick:Supply_Water_Temperature_Sensor
+            - brick:Hot_Water_Supply_Temperature_Sensor
+          - brick:Return_Water_Temperature_Sensor
+            - brick:Hot_Water_Return_Temperature_Sensor
+          - brick:Domestic_Hot_Water_Temperature_Sensor
+        - brick:Radiant_Panel_Temperature_Sensor
+          - brick:Embedded_Temperature_Sensor: Measures the internal temperature of the radiant layer of the radiant heating and cooling HVAC system.
       - brick:Heat_Sensor
       - brick:Motion_Sensor: Detects the presence of motion in some area
         - brick:PIR_Sensor: Detects the presense of motion in some area using the differential change in infrared intensity between two or more receptors
@@ -219,15 +203,17 @@ Classes and their inheritance relationship:
       - brick:Fire_Sensor: Measures the presence of fire
       - brick:Adjust_Sensor
         - brick:Temperature_Adjust_Sensor: Measures user-provided adjustment of temperature
-      - brick:Temperature_Sensor
-        - brick:Air_Temperature_Sensor: Measures the temperature of air
-          - brick:Outside_Air_Temperature_Sensor: Measures the temperature of outside air
-            - brick:Outside_Air_Temperature_Enable_Differential_Sensor
-              - brick:Low_Outside_Air_Temperature_Enable_Differential_Sensor
-        - brick:Water_Temperature_Sensor: Measures the temperature of water
-          - brick:Domestic_Hot_Water_Temperature_Sensor
-        - brick:Radiant_Panel_Temperature_Sensor
-          - brick:Embedded_Temperature_Sensor: Measures the internal temperature of the radiant layer of the radiant heating and cooling HVAC system.
+      - brick:Air_Quality_Sensor
+        - brick:CO_Sensor: Measures properties of CO
+          - brick:CO_Level_Sensor: Measures the concentration of CO
+          - brick:CO_Differential_Sensor
+          - brick:Outside_Air_CO_Sensor: Measures the concentration of CO in outside air
+          - brick:Return_Air_CO_Sensor: Measures the concentration of CO in return air
+        - brick:CO2_Sensor: Measures properties of CO2 in air
+          - brick:CO2_Level_Sensor: Measures the concentration of CO2 in air
+          - brick:Outside_Air_CO2_Sensor: Measures the concentration of CO2 in outside air
+          - brick:CO2_Differential_Sensor: Measures the difference between CO2 levels of inside and outside air
+          - brick:Return_Air_CO2_Sensor: Measures the concentration of CO2 in return air
     - brick:Setpoint
       - brick:Temperature_Setpoint: Sets temperature
         - brick:Radiant_Panel_Temperature_Setpoint: Sets temperature of radiant panel.
@@ -235,11 +221,6 @@ Classes and their inheritance relationship:
         - brick:Heating_Temperature_Setpoint: Sets temperature for heating
     - brick:Status
       - brick:Thermostat_Status: Status of a thermostat
-      - brick:Fan_Status: Indicates properties of fans
-        - brick:Fan_On_Off_Status
-      - brick:Off_Status
-        - brick:On_Off_Status
-      - brick:On_Status
 - brick:Entity
 - rdfs:Resource
   - rec:Asset
@@ -249,7 +230,6 @@ Classes and their inheritance relationship:
     - rec:PointEvent
       - rec:ObservationEvent
         - rec:TemperatureObservation
-        - rec:VolumeObservation
         - rec:DistanceObservation
   - rec:Space
     - rec:Architecture
@@ -424,6 +404,36 @@ brick:hasAmbientTemperature
 brick:latitude
     domain: brick:Entity, bsh:CoordinateShape
     range: rdfs:Resource
+rec:weight
+    domain: rec:Asset
+    range: xsd:decimal
+brick:longitude
+    domain: brick:Entity, bsh:CoordinateShape
+    range: rdfs:Resource
+rec:image
+    domain: rec:Person
+    range: xsd:anyURI
+rec:gender
+    domain: rec:Person
+    range: xsd:string
+rec:IPAddress
+    domain: rec:Asset
+    range: xsd:string
+brick:timestamp
+    domain: brick:Entity, bsh:LastKnownBooleanShape, bsh:LastKnownDoubleShape, bsh:LastKnownDurationShape, bsh:LastKnownIntegerShape, bsh:LastKnownValueShape
+    range: xsd:dateTime
+brick:hasSubMeter
+    domain: brick:Meter
+    range: brick:Meter
+rec:coordinates
+    domain: rec:MultiPoint, rec:MultiPolygon, rec:Point, rec:Polygon
+    range: ns1:MultiPoint, ns1:MultiPolygon, ns1:Point, ns1:Polygon
+brick:ambientTemperatureOfMeasurement
+    domain: bsh:Electric_CurrentQuantityShape, bsh:PowerQuantityShape, bsh:VoltageQuantityShape
+    range: bsh:TemperatureShape
+brick:latitude
+    domain: brick:Entity, bsh:CoordinateShape
+    range: rdfs:Resource
 rec:leasee
     domain: rec:Lease
     range: rec:Agent
@@ -451,36 +461,6 @@ rec:leaseOf
 rec:addressLine2
     domain: rec:PostalAddress
     range: xsd:string
-brick:latitude
-    domain: brick:Entity, bsh:CoordinateShape
-    range: rdfs:Resource
-rec:weight
-    domain: rec:Asset
-    range: xsd:decimal
-brick:longitude
-    domain: brick:Entity, bsh:CoordinateShape
-    range: rdfs:Resource
-rec:image
-    domain: rec:Person
-    range: xsd:anyURI
-rec:gender
-    domain: rec:Person
-    range: xsd:string
-rec:IPAddress
-    domain: rec:Asset
-    range: xsd:string
-rec:timestamp
-    domain: rec:Event
-    range: xsd:dateTime
-brick:hasSubMeter
-    domain: brick:Meter
-    range: brick:Meter
-rec:coordinates
-    domain: rec:MultiPoint, rec:MultiPolygon, rec:Point, rec:Polygon
-    range: ns1:MultiPoint, ns1:MultiPolygon, ns1:Point, ns1:Polygon
-brick:ambientTemperatureOfMeasurement
-    domain: bsh:Electric_CurrentQuantityShape, bsh:PowerQuantityShape, bsh:VoltageQuantityShape
-    range: bsh:TemperatureShape
 rec:locatedIn
     domain: rec:Asset, rec:BuildingElement
     range: rec:Architecture, rec:Space
@@ -541,36 +521,6 @@ brick:ambientTemperatureOfMeasurement
 brick:isLocationOf
     domain: brick:Location
     range: brick:Entity
-brick:isFedBy
-    domain: brick:Location
-    range: brick:Equipment
-rec:isFedBy
-    domain: brick:Equipment, rec:Architecture
-    range: rdfs:Resource
-rec:regulatedBy
-    domain: rec:Lease
-    range: rec:LeaseContract
-rec:owns
-    domain: rec:Agent
-    range: rdfs:Resource
-brick:isReplacedBy
-    domain: brick:Entity
-    range: brick:Entity
-rec:regulates
-    domain: rec:LeaseContract
-    range: rec:Lease
-rec:servicedBy
-    domain: rec:Asset
-    range: rec:Agent
-rec:manufacturedBy
-    domain: rec:Asset
-    range: rec:Agent
-rec:ownedBy
-    domain: rec:Architecture
-    range: rec:Agent
-rec:producedBy
-    domain: rec:ServiceObject
-    range: brick:Point
 rec:targetPoint
     domain: rec:ActuationEvent
     range: brick:Point
@@ -631,36 +581,6 @@ rec:servicedBy
 skos:narrower
     domain: None
     range: None
-brick:isPartOf
-    domain: brick:Equipment, brick:Location
-    range: rdfs:Resource
-brick:hasPart
-    domain: brick:Building, brick:Collection, brick:DDAHU, brick:Electric_Vehicle_Charging_Hub, brick:Electric_Vehicle_Charging_Station, brick:Equipment, brick:Floor, brick:HVAC_Equipment, brick:Lighting_Equipment, brick:Location, brick:Loop, brick:Photovoltaic_Array, brick:Portfolio, brick:Site, brick:System, brick:Zone
-    range: brick:Electric_Vehicle_Charging_Port, brick:Electric_Vehicle_Charging_Station, brick:Equipment, brick:PV_Panel, brick:Site, rdfs:Resource
-rec:includes
-    domain: brick:Collection, brick:Loop, brick:PV_Array, rec:Apartment, rec:Campus, rec:EquipmentCollection, rec:FurnitureCollection, rec:Portfolio, rec:Premises, rec:RealEstate
-    range: brick:Equipment, brick:PV_Panel, rdfs:Resource, rec:Architecture, rec:Furniture, rec:Room
-brick:isTagOf
-    domain: brick:Tag
-    range: owl:Class
-rec:region
-    domain: rec:PostalAddress
-    range: xsd:string
-brick:isAssociatedWith
-    domain: brick:Tag
-    range: owl:Class
-brick:isReplacedBy
-    domain: brick:Entity
-    range: brick:Entity
-brick:isLocationOf
-    domain: brick:Location
-    range: brick:Entity
-rec:isPartOf
-    domain: rec:Asset, rec:BuildingElement, rec:Organization, rec:Space
-    range: rec:Asset, rec:BuildingElement, rec:Organization, rec:Space
-rec:isMemberOf
-    domain: rec:Agent
-    range: rec:Organization
 
 --- AVAILABLE API ENDPOINTS ---
 Host Path: https://fiware.eonerc.rwth-aachen.de/
