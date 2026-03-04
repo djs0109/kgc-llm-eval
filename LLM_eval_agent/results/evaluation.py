@@ -19,6 +19,7 @@ task_mappings = {
     "7": "Connection Property Identification"
 }
 
+# todo task mapping for KGC
 
 def metrics_evaluation(results_dict):
     bar_plot_cognitive(results_dict)
@@ -65,7 +66,7 @@ def line_plot_human_effort(results_dict):
     plt.show()
 
 if __name__ == '__main__':
-    path_cot = r"D:\Git\kgc-llm-eval\LLM_eval_agent\results\fiware_v1_context_gemini(example)\prompt_cot_evaluation.txt"
+    path_cot = r"D:\Git\kgc-llm-eval\LLM_eval_agent\results\fiware_v1_context_gemini(example)\CoT.txt"
     path_evaluation_output = r"D:\Git\kgc-llm-eval\LLM_eval_agent\results\fiware_v1_context_gemini(example)\output_evaluation.json"
 
     # load the cot from the file

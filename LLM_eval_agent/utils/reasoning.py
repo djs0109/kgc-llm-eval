@@ -59,6 +59,7 @@ def inference_owlrl(
     print(f"Triples number before reasoning: {len(g)}")
 
     # Perform RDFS inference
+    # TODO check whether to use RDFS_Semantics or OWLRL_Semantics
     # owlrl.RDFS_Semantics(g, axioms=True, daxioms=False, rdfs=True).closure()
     owlrl.DeductiveClosure(owlrl.OWLRL_Semantics).expand(g)
 

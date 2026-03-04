@@ -197,6 +197,7 @@ class OntologyPropertyAnalyzer:
 
         return properties
 
+    # TODO this agent-tool is currently not used.
     def classify_props_LLM(self, inherited_properties) -> dict:
         """
         Classify a list of property strings into 'numerical' and 'non_numerical' categories using an LLM agent.
@@ -249,6 +250,8 @@ class OntologyPropertyAnalyzer:
         inferred_graph.parse(str(inferred_path), format='turtle')
 
         # Corrected SPARQL: Selects properties that are DatatypeProperties or have numeric ranges
+        # TODO the results are not correct. Currently, PIR Sensor, Outside Air Temperature Sensor, etc.
+        #  are found as classes without numerical properties. The way to define NUMERICAL properties is crucial.
         sparql_query = """
             PREFIX owl: <http://www.w3.org/2002/07/owl#>
             PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -316,6 +319,7 @@ class OntologyPropertyAnalyzer:
             if classifier == "LLM":
                 self.classification.update(self.classify_props_LLM(unclassified_props))
             elif classifier == "inference": # Currently not working
+                # TODO the results are not correct
                 self.classification.update(self.classify_props_inference(unclassified_props, target_classes))
             else: 
                 raise ValueError(f"Unknown classifier: {classifier}")
@@ -372,7 +376,8 @@ if __name__ == "__main__":
 
     brick_analyzer = OntologyPropertyAnalyzer(ontology_path)
     brick_analyzer.get_non_numeric_classes(target_classes)
-    
+
+    # TODO do we need this?
     # Showcase of memory: Already classified properties are not being classified again
     print("\n\n\n=== Repeated Run ===") 
     brick_analyzer.get_non_numeric_classes(target_classes)

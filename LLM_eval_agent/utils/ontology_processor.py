@@ -45,7 +45,7 @@ class OntologyProcessor:
         self.p_index = self._build_embeddings(self.properties)
 
         # Initialize PropertyDependencyResolver
-        self.dependency_resolver = PropertyDependencyResolver(self.ont)
+        self.dependency_resolver: PropertyDependencyResolver = PropertyDependencyResolver(self.ont)
 
     def _get_shape_prefixes(self):
         """
@@ -248,13 +248,15 @@ class OntologyProcessor:
                 property_results.extend(results)
 
         class_tree = self._build_tree(class_results, term_type='class')
-        property_tree = self._build_tree(property_results, term_type='property')
+        # TODO instead of building a dependency tree, build a mapping of properties to their connected classes
+        # property_tree = self._build_tree(property_results, term_type='property')
+        property_tree = self._build_property_map_shacl(property_results)
 
         string_results = []
         if class_tree:
-            string_results.append(f"Classes:\n{class_tree}")
+            string_results.append(f"Classes and their inheritance relationship:\n{class_tree}")
         if property_tree:
-            string_results.append(f"Properties:\n{property_tree}")
+            string_results.append(f"Properties and their domain and range:\n{property_tree}")
 
         return "\n".join(string_results)
 
@@ -311,8 +313,10 @@ class OntologyProcessor:
                 
                 # Get and display detailed dependencies
                 if property_uri:
-                    detailed_deps = self.dependency_resolver.get_detailed_dependencies(str(property_uri))
+                    # TODO remove the dependency searching for properties
+                    # detailed_deps = self.dependency_resolver.get_detailed_dependencies(str(property_uri))
                     # reverse_deps = self.dependency_resolver.get_reverse_dependencies(str(property_uri))
+                    detailed_deps = None
                     reverse_deps = None
                     
                     if detailed_deps:
@@ -454,6 +458,36 @@ class OntologyProcessor:
         
         return complete_tree
         
+    def _build_property_map_shacl(self, property_results: List[Tuple[str, float, Dict]]) -> str:
+        """
+        Create a mapping of properties to their connected classes for shacl based ontologies.
+        Output format (example):
+            ...
+            brick:hasLocation
+                domain: brick:Equipment, brick:Sensor ...
+                range: brick:Room, brick:Location, ...
+            brick:isPartOf
+                domain: brick:Sensor, ...
+                range: brick:Equipment, ...
+        """
+        output_string = ""
+        for item_id, score, info in property_results:
+            property_uri = info.get("uri")
+            if property_uri:
+                _d, _r = self.dependency_resolver.get_domain_range_shacl(property_uri)
+
+                # Format the sets into comma-separated strings.
+                # Sort them to ensure deterministic, consistent output.
+                domain_str = ", ".join(sorted(_d)) if _d else "None"
+                range_str = ", ".join(sorted(_r)) if _r else "None"
+
+                # Build the formatted string block
+                output_string += f"{item_id}\n"
+                output_string += f"    domain: {domain_str}\n"
+                output_string += f"    range: {range_str}\n"
+
+        # Strip any trailing newlines from the final output
+        return output_string.strip()
 
 
 class PropertyDependencyResolver:
@@ -632,6 +666,84 @@ class PropertyDependencyResolver:
         
         return reverse_deps
 
+    def get_domain_range_shacl(self, property_uri) -> Tuple[set, set]:
+        """
+        Get the domain and range of a property for shacl based ontologies.
+        Args:
+            property_uri (str): The property URI to analyze.
+        Returns:
+            tuple: (set of domain class URIs, set of range class URIs)
+        """
+        domains = set()
+        ranges = set()
+
+        # SPARQL query to extract target classes (domain) and range constraints (range)
+        query = f"""
+            PREFIX sh: <http://www.w3.org/ns/shacl#>
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+            SELECT ?domain ?range
+            WHERE {{
+                # Find the subject that has the PropertyShape
+                ?subject sh:property ?propertyShape .
+                ?propertyShape sh:path <{property_uri}> .
+
+                # DOMAIN: Explicit targetClass OR the subject itself if it's a Class
+                OPTIONAL {{
+                    {{ ?subject sh:targetClass ?domain . }}
+                    UNION
+                    {{ 
+                        ?subject a ?type .
+                        FILTER(?type IN (owl:Class, rdfs:Class))
+                        BIND(?subject AS ?domain)
+                    }}
+                }}
+
+                # RANGE: Class, datatype, or nested node shape
+                OPTIONAL {{
+                    {{ ?propertyShape sh:class ?range . }}
+                    UNION
+                    {{ ?propertyShape sh:datatype ?range . }}
+                    UNION
+                    {{ ?propertyShape sh:node ?range . }}
+                }}
+            }}
+            """
+
+        # Query the ontology graph
+        _results = self.graph.query(query)
+
+        # # Process the results
+        # for row in _results:
+        #     if row.domain:
+        #         domains.add(str(row.domain))
+        #     if row.range:
+        #         ranges.add(str(row.range))
+
+        # Process the results and convert to QNames using the graph's namespace manager
+        for row in _results:
+            if row.domain:
+                try:
+                    # Attempt to bind to a prefix (e.g., brick:Equipment)
+                    domains.add(self.graph.qname(row.domain))
+                except Exception:
+                    # Fallback to the full URI if no prefix is found in the graph
+                    domains.add(str(row.domain))
+            else:
+                # If no explicit domain is found use rdfs:Resource as default
+                domains.add("rdfs:Resource")
+
+            if row.range:
+                try:
+                    ranges.add(self.graph.qname(row.range))
+                except Exception:
+                    ranges.add(str(row.range))
+            else:
+                # If no explicit range is found use rdfs:Resource as default
+                ranges.add("rdfs:Resource")
+
+        return domains, ranges
     
 if __name__ == "__main__":
 

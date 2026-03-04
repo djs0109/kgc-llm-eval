@@ -444,59 +444,58 @@ class PromptsLoader:
         </input>""")
 
         # CONTEXT PROMPTS ================================================================
-        if self.offline_mode:
-            # --- OFFLINE MODE: INJECT LIST ---
-            ontology_summary = self.get_ontology_summary()
+        # if self.offline_mode:
+        #     # --- OFFLINE MODE: INJECT LIST ---
+        #     ontology_summary = self.get_ontology_summary()
+        #
+        #     term_mapping_instructions = textwrap.dedent(f"""
+        #     # TERM MAPPING INSTRUCTIONS:
+        #     <instructions>
+        #     You are currently operating in OFFLINE mode. You DO NOT have access to external tools.
+        #
+        #     Instead, use the list below to find the correct Ontology Classes and Properties.
+        #
+        #     {ontology_summary}
+        #
+        #     MAPPING CRITERIA:
+        #     1. Look for an Exact semantic match in the list above.
+        #     2. If no exact match, look for a parent concept (e.g., use 'brick:Sensor' if 'brick:CO2Sensor' is missing).
+        #     3. Do NOT invent classes that are not in the list.
+        #     </instructions>
+        #     """)
+        # else:
+        #     # --- ONLINE MODE: TOOL USE ---
+        # TODO check the term mapping instructions for online and offline mode
+        # TERM MAPPING INSTRUCTIONS
+        term_mapping_instructions = textwrap.dedent(f"""
+        Based on the extraction of available Ontology Classes and Properties and the list of terms that need to be mapped to the ontology,
+        for each term, you need to select the most appropriate ontology class or property for the domain entity or relation.
+        Do not choose a class or property that is not in the list of available ontology classes or properties.
+        The goal is to inherit the attributes and relations from the selected Ontology Class or Property.
 
-            term_mapping_instructions = textwrap.dedent(f"""
-            # TERM MAPPING INSTRUCTIONS: 
-            <instructions>
-            You are currently operating in OFFLINE mode. You DO NOT have access to external tools.
+        MAPPING CRITERIA: (in order of priority)
+        1. Exact semantic match
+        2. Hierarchical relationship (parent/child concepts)
+        3. Functional equivalence (same purpose/behavior)
+        4. Attribute similarity (same properties/characteristics)
 
-            Instead, use the list below to find the correct Ontology Classes and Properties.
+        SPECIAL CONSIDERATIONS:
+        - Distinguish locations, systems, devices, actuation points, sensors
+        - Avoid category errors: don't confuse the thing itself with top-level infrastructure that supports the thing
 
-            {ontology_summary}
+        JUST FOR CLASSES:
+        - Respect system hierarchies (building → floor → room → equipment)
+        - If the term seems to be a relation, select a class that would have this relation as a property.
 
-            MAPPING CRITERIA:
-            1. Look for an Exact semantic match in the list above.
-            2. If no exact match, look for a parent concept (e.g., use 'brick:Sensor' if 'brick:CO2Sensor' is missing).
-            3. Do NOT invent classes that are not in the list.
-            </instructions>
-            """)
-        else:
-            # --- ONLINE MODE: TOOL USE ---
-            term_mapping_instructions = textwrap.dedent(f"""
-            # TERM MAPPING INSTRUCTIONS: 
-            <instructions>
-            Based on the extraction of available Ontology Classes and Properties and the list of terms that need to be mapped to the ontology,
-            for each term, you need to select the most appropriate ontology class or property for the domain entity or relation.
-            Do not choose a class or property that is not in the list of available ontology classes or properties.
-            The goal is to inherit the attributes and relations from the selected Ontology Class or Property.
-    
-            MAPPING CRITERIA: (in order of priority)
-            1. Exact semantic match
-            2. Hierarchical relationship (parent/child concepts)
-            3. Functional equivalence (same purpose/behavior)
-            4. Attribute similarity (same properties/characteristics)
-    
-            SPECIAL CONSIDERATIONS:
-            - Distinguish locations, systems, devices, actuation points, sensors
-            - Avoid category errors: don't confuse the thing itself with top-level infrastructure that supports the thing
-    
-            JUST FOR CLASSES:
-            - Respect system hierarchies (building → floor → room → equipment)
-            - If the term seems to be a relation, select a class that would have this relation as a property.
-    
-            JUST FOR PROPERTIES:
-            - Maintain the original direction of the relationship (subject → predicate → object), e. g.: is_instance_of NOT EQUAL TO is_instanciated_by
-            </instructions>
-            """)
+        JUST FOR PROPERTIES:
+        - Maintain the original direction of the relationship (subject → predicate → object), e. g.: is_instance_of NOT EQUAL TO is_instanciated_by
+        """)
 
+        # TODO check whether I can reduce the context size
         self.context = textwrap.dedent(f"""
         <context>
         {self.jex}
         {self.MAPPING_REFERENCE}
-        {term_mapping_instructions}
         </context>
 
         <instructions>
@@ -527,7 +526,7 @@ class PromptsLoader:
 
         The class of the top-level object is a string that contains the values of the class_keys joined by underscores in senseful order.
         For each top-level object in the JSON (unique value of class_keys) retrieve suitable ontology classes.
-        Use the Term Mapping Instructions to select the most appropriate ontology classes.
+        {term_mapping_instructions}
 
         Each entity can have multiple properties, which are represented as key-value pairs inside a top-level object in the JSON file.
 
@@ -535,27 +534,13 @@ class PromptsLoader:
         These relational properties should be mapped to appropriate ontology properties.
         The ontology structure should represent the relatonships between top-level objects through relational properties.
 
-        Within the JSON structure, you'll encounter entities, that can have a numerical value (accesible by the API endpoint).
-        You need to make sure, that those entities that need to have a numerical value in the JSON, also can have a numerical value in the ontology.
-        Therefore you need to check if the selected ontology class for the entity having a numerical value supports having a numerical property, either directly or through inheritance.
-        
-        ### EXTRA NODE CREATION RULES (ONTOLOGY-AGNOSTIC SEMANTICS) ###
-        In semantic modeling for IoT, there is a strict separation between physical/spatial things and data streams. You MUST follow these conceptual rules when deciding whether to create an extra node for a numerical property:
-        
-        1. NO EXTRA NODES FOR TELEMETRY/DATA ENTITIES (Sensors, Setpoints, Commands, Statuses):
-        If the mapped ontology class inherently represents a data stream, measurement, observation, or control point, you MUST NOT create an extra node. These classes are conceptually designed to hold numerical values directly. **This rule overrides the NUMERIC CAPABILITY VALIDATION list.**
-        *(Example in Brick ontology: Subclasses of `brick:Point` like `brick:Temperature_Sensor` or `brick:CO2_Setpoint` do not get extra nodes. Example in SAREF: `saref:Sensor` or `saref:Measurement`).*
-        
-        2. EXTRA NODES REQUIRED FOR EQUIPMENT, SYSTEMS & LOCATIONS:
-        If the mapped ontology class represents a physical device, piece of equipment, abstract system, or spatial location, it CANNOT hold a telemetry numerical value directly. You MUST create a supplementary entity ("extra node") that represents the specific data point (like a Setpoint, Command, or Sensor) to hold the numerical value.
-        *(Example in Brick ontology: `brick:Ventilation_Air_System` requires an extra node like `brick:Air_Flow_Setpoint` to hold the actual number).*
-
+        Within the JSON structure, you'll encounter entities, that can have numerical values (accessible by the API endpoint).
+        For the mapped ontology classes of these entities, you need to check if suitable property classes (also check the possible properties of parent classes) exist.
+        If you cannot find a suitable property class, it is a semantic mismatch between the input data model and the ontology.
+        In this case, you can create an extra node (a supplementary entity) that can hold the numerical value and is connected to the original entity through a meaningful relationship.
         For each extra node you create, you must define the relationships connecting it to its parent entity in BOTH directions:
-        1. "child_to_parent_relation": The property from the extra node TO the parent entity (extra node → parent entity).
-        2. "parent_to_child_relation": The inverse property from the parent entity TO the extra node (parent entity → extra node).
-        
-        Select the most appropriate properties from the Available Ontology Properties list provided above. Otherwise, use the term_mapper tool with an appropriate query. Do not use a global relation; define these strictly within each extra node's object.
-        If there are no extra nodes, leave the list empty.
+           1. "child_to_parent_relation": The property from the extra node TO the parent entity (extra node → parent entity).
+           2. "parent_to_child_relation": The inverse property from the parent entity TO the extra node (parent entity → extra node).
         </instructions>
 
         <output>{self.templates['context']}</output>

@@ -148,7 +148,7 @@ class ScenarioExecutor:
         Gathers all necessary ontology information locally to create the 'Super-Prompt'.
         This allows the LLM to provide the final context in a single query.
         """
-        print(f"\nCalculating Mapping Reference (Classifier: {classifier})...")
+        # print(f"\nCalculating Mapping Reference (Classifier: {classifier})...")
         try:
             with open(self.JEX_path, 'r', encoding='utf-8') as f:
                 jex_data = json.load(f)
@@ -170,8 +170,9 @@ class ScenarioExecutor:
             mapping_text = term_mapper(terms)
 
             # Extract a list of unique class identifiers (e.g., 'module:ClassName') from the text
+            # TODO remove unused code
             found_classes = list(set(re.findall(r'[a-zA-Z0-9]+:[A-Z][a-zA-Z0-9_]+', mapping_text)))
-            non_numeric_list = get_non_numeric_classes(found_classes, classifier=classifier)
+            # non_numeric_list = get_non_numeric_classes(found_classes, classifier=classifier)
             api_endpoints = get_endpoint_list(host_path=self.host_path)
 
             # 4. Construct the final Reference Block
@@ -180,7 +181,7 @@ class ScenarioExecutor:
             reference_block += f"--- NUMERIC CAPABILITY VALIDATION ---\n"
             reference_block += "The following classes were found to lack direct numeric properties. "
             reference_block += "If you map an entity to these, you MUST create an Extra Node:\n"
-            reference_block += ", ".join(non_numeric_list) if non_numeric_list else "None (all support direct values)."
+            # reference_block += ", ".join(non_numeric_list) if non_numeric_list else "None (all support direct values)."
 
             prompts.MAPPING_REFERENCE = reference_block
             prompts.update_variables()
